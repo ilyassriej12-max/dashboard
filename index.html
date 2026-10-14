@@ -140,6 +140,7 @@ button { font-family: inherit; }
 a { color: inherit; }
 img { max-width: 100%; }
 :focus-visible { outline: none; box-shadow: var(--ring-focus); border-radius: 12px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
 /* ---------- atmosphere ---------- */
 .atmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
@@ -734,7 +735,7 @@ img { max-width: 100%; }
 .ws-panel.hidden { display:none; }
 .ws-head { display:flex; align-items:center; gap:10px; padding:11px 12px; border-bottom:1px solid var(--border); cursor:grab; user-select:none; background:var(--glass); flex:none; }
 .ws-head:active { cursor:grabbing; }
-.ws-grip { color:var(--faint); display:grid; place-items:center; }
+.ws-grip { color:var(--faint); display:grid; place-items:center; border:0; padding:0; background:transparent; cursor:grab; }
 .ws-grip svg { width:15px; height:15px; }
 .ws-ico { width:26px; height:26px; border-radius:8px; display:grid; place-items:center; background:var(--glass-2); border:1px solid var(--border); flex:none; }
 .ws-ico svg { width:14px; height:14px; }
@@ -782,9 +783,47 @@ img { max-width: 100%; }
   .tr-orb, .tr-orb::after, .live-chip i, .wave i, .agent-item.run .ad svg, .ws-sim .ball { animation:none !important; }
   .notes-body, .ws-panel, .tr-step { transition:none !important; }
 }
+
+/* ---------- Phase 2 modules: reuses the existing card, token, and motion system ---------- */
+.skip-link { position:fixed; left:16px; top:12px; z-index:200; transform:translateY(-170%); padding:10px 14px; border-radius:12px; background:var(--primary); color:#06111f; font-weight:700; text-decoration:none; transition:transform var(--motion-fast) var(--ease); }
+.skip-link:focus { transform:none; }
+.module-head { display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+.module-head h1 { font-size:var(--t-xl); }
+.module-head p { color:var(--muted); font-size:13px; margin-top:5px; }
+.module-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.module-grid.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.module-grid.sidebar { grid-template-columns:minmax(0,1.45fr) minmax(260px,.75fr); }
+.module-card { padding:20px; display:grid; gap:14px; min-width:0; }
+.module-card h3 { font-size:16px; }
+.module-card p { color:var(--muted); font-size:13px; }
+.person { display:flex; align-items:center; gap:12px; }
+.person .avatar { width:46px; height:46px; border-radius:14px; display:grid; place-items:center; flex:none; background:var(--grad-brand); color:#06111f; font-family:var(--font-display); font-weight:700; }
+.person .info { min-width:0; flex:1; }.person .info b,.person .info span { display:block; }.person .info b { font-size:14px; }.person .info span { margin-top:2px; color:var(--muted); font-size:12px; }
+.teacher-card { padding:20px; display:grid; gap:16px; }.teacher-card .teacher-meta { display:flex; gap:8px; flex-wrap:wrap; }
+.task-row,.notice-row,.resource-row { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }.task-row:last-child,.notice-row:last-child,.resource-row:last-child { border-bottom:0; }
+.task-check { width:22px; height:22px; appearance:none; border:1px solid var(--border-strong); border-radius:8px; background:var(--glass); cursor:pointer; flex:none; }.task-check:checked { background:var(--success); border-color:var(--success); box-shadow:inset 0 0 0 5px rgba(6,9,18,.72); }
+.task-copy,.notice-copy,.resource-copy { min-width:0; flex:1; }.task-copy b,.notice-copy b,.resource-copy b { display:block; font-size:13.5px; }.task-copy span,.notice-copy span,.resource-copy span { display:block; color:var(--muted); font-size:12px; margin-top:2px; }
+.notice-row.unread { border-left:3px solid var(--primary); padding-left:12px; background:linear-gradient(90deg,rgba(79,124,255,.10),transparent); border-radius:0 12px 12px 0; }
+.notice-ico,.resource-ico { width:38px; height:38px; display:grid; place-items:center; border-radius:12px; flex:none; background:var(--glass-2); border:1px solid var(--border); color:var(--accent); }.notice-ico svg,.resource-ico svg { width:18px; height:18px; }
+.resource-row { padding:12px 0; }.resource-row:hover { background:var(--glass); }.resource-row .tag { flex:none; }
+.filter-bar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }.filter-btn { min-height:36px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:var(--glass); color:var(--fg-2); font:500 12.5px var(--font-body); cursor:pointer; }.filter-btn[aria-pressed="true"] { color:var(--primary-soft); background:rgba(79,124,255,.16); border-color:rgba(79,124,255,.38); }
+.calendar-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; }.calendar-grid .dow { color:var(--muted); font:600 11px var(--font-mono); text-align:center; padding-bottom:4px; }.calendar-day { min-height:92px; padding:8px; border:1px solid var(--border); border-radius:12px; background:var(--glass); color:var(--fg-2); font-size:12px; }.calendar-day.today { border-color:rgba(79,124,255,.55); background:rgba(79,124,255,.12); }.calendar-day .event { display:block; padding:4px 6px; margin-top:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border-radius:6px; color:var(--primary-soft); background:rgba(79,124,255,.16); font-size:10px; }.calendar-day .event.due { color:var(--warning); background:rgba(251,146,60,.12); }
+.library-hero { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(250px,.6fr); gap:16px; }.continue-card { padding:20px; display:grid; gap:14px; border-color:rgba(34,211,238,.28); }.continue-card .resource-ico { width:48px; height:48px; color:var(--accent); }
+.settings-list { display:grid; gap:0; }.setting-row { display:flex; align-items:center; gap:14px; padding:15px 0; border-bottom:1px solid var(--border); }.setting-row:last-child { border:0; }.setting-row .copy { flex:1; min-width:0; }.setting-row .copy b,.setting-row .copy span { display:block; }.setting-row .copy b { font-size:13.5px; }.setting-row .copy span { color:var(--muted); font-size:12px; margin-top:2px; }.switch { width:42px; height:24px; border:0; border-radius:999px; padding:3px; background:rgba(255,255,255,.16); cursor:pointer; transition:background var(--motion-fast) var(--ease); }.switch i { display:block; width:18px; height:18px; border-radius:50%; background:var(--fg-2); transition:transform var(--motion-fast) var(--ease); }.switch[aria-pressed="true"] { background:var(--primary); }.switch[aria-pressed="true"] i { transform:translateX(18px); background:#fff; }
+.profile-hero { display:flex; gap:18px; align-items:center; padding:24px; }.profile-avatar { width:74px; height:74px; border-radius:24px; display:grid; place-items:center; flex:none; background:var(--grad-brand); color:#06111f; font:700 26px var(--font-display); box-shadow:var(--glow-primary); }.profile-hero h1 { font-size:var(--t-xl); }.profile-hero p { color:var(--muted); font-size:13px; margin-top:5px; }
+.achievement { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }.achievement:last-child { border:0; }.achievement .badge-orb { width:36px; height:36px; border-radius:50%; display:grid; place-items:center; background:rgba(168,85,247,.16); border:1px solid rgba(168,85,247,.34); color:var(--secondary); }
+.search-results { display:grid; gap:10px; }.search-result { text-align:left; width:100%; display:flex; align-items:center; gap:12px; padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--glass); color:var(--text); cursor:pointer; }.search-result:hover { border-color:var(--border-strong); background:var(--glass-2); }.search-result svg { width:18px; height:18px; color:var(--primary-soft); flex:none; }
+.toast-region { position:fixed; right:24px; bottom:24px; z-index:120; display:grid; gap:8px; pointer-events:none; }.toast { max-width:340px; padding:12px 14px; border:1px solid rgba(79,124,255,.45); border-radius:14px; background:rgba(10,17,32,.94); color:var(--text); box-shadow:var(--shadow-lift); font-size:13px; animation:riseIn var(--motion-base) var(--ease) both; }
+.draw-canvas { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:crosshair; z-index:2; }.cls-board > :not(.draw-canvas):not(.board-grid) { z-index:3; }.cls-board .board-grid { z-index:1; }.cls-board.drawing .formula,.cls-board.drawing .teacher-presence { pointer-events:none; }
+.ws-board-draw { position:relative; min-height:150px; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:linear-gradient(180deg,rgba(10,17,32,.72),rgba(6,9,18,.82)); }.ws-board-draw .draw-canvas { z-index:2; }.ws-board-draw span { position:relative; z-index:1; display:block; padding:10px 14px 0; font:12px var(--font-mono); color:var(--fg-2); pointer-events:none; }.ws-board-draw span:last-child { color:var(--accent); padding-bottom:10px; }
+.focus-mode .cls-panel { display:none; }.focus-mode .cls-grid { grid-template-columns:minmax(0,1fr); max-width:900px; margin:auto; }.focus-mode .cls-stage { max-width:900px; }.focus-mode .cls-board { min-height:560px; }
+@media (max-width:1024px) { .module-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.module-grid.sidebar,.library-hero { grid-template-columns:1fr; } }
+@media (max-width:620px) { .module-grid,.module-grid.two { grid-template-columns:1fr; }.calendar-day { min-height:70px; padding:6px; }.calendar-day .event { font-size:0; height:7px; padding:0; border-radius:999px; }.calendar-grid { gap:4px; }.profile-hero { align-items:flex-start; }.toast-region { left:14px; right:14px; bottom:86px; }.toast { max-width:none; }.cls-dock { bottom:78px; } }
 </style>
 </head>
 <body>
+
+<a class="skip-link" href="#mainContent">Skip to main content</a>
 
 <div class="atmos" aria-hidden="true">
   <span class="blob b1"></span>
@@ -889,7 +928,7 @@ img { max-width: 100%; }
   </aside>
 
   <!-- ==================== MAIN ==================== -->
-  <main class="main">
+  <main class="main" id="mainContent" tabindex="-1">
     <header class="topbar">
       <button class="menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false"><svg><use href="#i-menu"/></svg></button>
       <div class="lead">
@@ -910,7 +949,7 @@ img { max-width: 100%; }
         <span class="pill weather" title="Local weather"><svg><use href="#i-weather"/></svg>18° Clear</span>
         <span class="pill streak" title="Current streak"><svg><use href="#i-flame"/></svg>24 day streak</span>
         <button class="ico-btn" id="bellBtn" aria-label="Notifications"><svg><use href="#i-bell"/></svg><span class="dot-badge"></span></button>
-        <button class="ico-btn" aria-label="Profile"><svg><use href="#i-profile"/></svg></button>
+        <button class="ico-btn" id="profileBtn" aria-label="Profile"><svg><use href="#i-profile"/></svg></button>
       </div>
     </header>
 
@@ -1081,7 +1120,7 @@ img { max-width: 100%; }
         <div><h2 style="font-size:var(--t-xl)">All subjects</h2><p>10 tracks · sorted by next scheduled session</p></div>
         <div class="right">
           <div class="od-rail" style="--od-rail-pad:0" role="tablist" aria-label="Filter subjects">
-            <span class="tag color">All</span><span class="tag">In progress</span><span class="tag">Recommended</span><span class="tag">Completed</span>
+            <button class="filter-btn" data-subject-filter="all" aria-pressed="true">All</button><button class="filter-btn" data-subject-filter="progress" aria-pressed="false">In progress</button><button class="filter-btn" data-subject-filter="recommended" aria-pressed="false">Recommended</button><button class="filter-btn" data-subject-filter="completed" aria-pressed="false">Completed</button>
           </div>
         </div>
       </div>
@@ -1141,18 +1180,33 @@ img { max-width: 100%; }
       </div>
     </section>
 
-    <!-- ==================== GENERIC VIEWS ==================== -->
+    <!-- ==================== PHASE 2 MODULE VIEWS ==================== -->
     <section class="view" id="view-progress">
       <div class="section-head"><div><h2 style="font-size:var(--t-xl)">Progress</h2><p>A deeper look at your learning analytics</p></div></div>
       <div class="analytics-grid" id="progressGrid"></div>
+      <section class="section">
+        <div class="section-head"><div><h2>Learning signals</h2><p>Patterns from recent sessions guide your next practice block.</p></div><div class="right"><span class="tag ok">Updated today</span></div></div>
+        <div class="module-grid sidebar">
+          <article class="card module-card">
+            <h3>Subject momentum</h3>
+            <div class="ws-list">
+              <div class="ws-item"><span class="fi"><svg><use href="#i-subjects"/></svg></span><div class="fm"><b>Mathematics</b><span>84% mastery · +6 pts this week</span></div><span class="tag ok">Strong</span></div>
+              <div class="ws-item"><span class="fi"><svg><use href="#i-atom"/></svg></span><div class="fm"><b>Physics</b><span>71% mastery · review waves</span></div><span class="tag color">Rising</span></div>
+              <div class="ws-item"><span class="fi"><svg><use href="#i-book"/></svg></span><div class="fm"><b>Literature</b><span>57% mastery · next review due</span></div><span class="tag warn">Review</span></div>
+            </div>
+          </article>
+          <article class="card module-card">
+            <h3>Next milestone</h3>
+            <p>Complete three more focused Mathematics sessions to finish Integration Techniques.</p>
+            <div class="bar"><i data-w="62"></i></div>
+            <span class="hint">62% of the roadmap complete</span>
+            <button class="btn btn-soft btn-sm" data-goview="subject">Open roadmap</button>
+          </article>
+        </div>
+      </section>
     </section>
-    <section class="view" id="view-generic">
-      <div class="section-head"><div><h2 style="font-size:var(--t-xl)" id="genericTitle">Teachers</h2><p id="genericSub">Part of the AI School OS navigation model</p></div></div>
-      <div class="card pad" style="display:grid;gap:14px">
-        <div class="tag-row"><span class="tag color">In development</span><span class="tag">Coming soon</span></div>
-        <p class="hint" style="max-width:560px">This surface is part of the AI School OS shell. The first concept focuses on the dashboard, navigation, subjects, and the design system; the remaining modules follow the same token and component language.</p>
-        <div><button class="btn btn-soft btn-sm" data-goview="dashboard">Back to dashboard</button></div>
-      </div>
+    <section class="view" id="view-generic" aria-live="polite">
+      <div id="moduleRoot"></div>
     </section>
 
     <!-- ==================== SUBJECT PAGE ==================== -->
@@ -1241,7 +1295,7 @@ img { max-width: 100%; }
           <p>Mathematics · Lesson 4 of 9 · Cohort Turing</p>
         </div>
         <span class="cls-clock"><svg><use href="#i-timer"/></svg><span id="clsClock">00:00</span></span>
-        <button class="btn btn-ghost btn-sm"><svg><use href="#i-panel"/></svg>Focus mode</button>
+        <button class="btn btn-ghost btn-sm" id="focusModeBtn" aria-pressed="false"><svg><use href="#i-panel"/></svg>Focus mode</button>
         <button class="btn btn-soft btn-sm" data-goview="workspace"><svg><use href="#i-layers"/></svg>Open workspace</button>
       </div>
 
@@ -1260,6 +1314,7 @@ img { max-width: 100%; }
         <div class="cls-stage">
           <div class="cls-board reveal">
             <span class="board-grid" aria-hidden="true"></span>
+            <canvas class="draw-canvas" id="classCanvas" tabindex="0" aria-label="Lesson whiteboard. Select a tool, then draw with a pointer. Press Delete to clear your drawing."></canvas>
             <div class="board-head">
               <span class="bt">Whiteboard · worked example</span>
               <span class="tag color" style="margin-left:auto"><svg style="width:13px;height:13px"><use href="#i-pen"/></svg>Teacher is drawing</span>
@@ -1308,19 +1363,19 @@ img { max-width: 100%; }
           <button class="notes-toggle" id="notesToggle" aria-expanded="true" aria-controls="notesBody"><span>Lesson notes</span><svg><use href="#i-chevron"/></svg></button>
           <div class="notes-body" id="notesBody">
             <textarea placeholder="Take notes as the teacher explains…">By parts: ∫u dv = uv − ∫v du. Choose u first (Liate).</textarea>
-            <div class="row-8" style="margin-top:10px"><button class="btn btn-soft btn-sm"><svg><use href="#i-check"/></svg>Save</button><button class="btn btn-ghost btn-sm">Export</button></div>
+            <div class="row-8" style="margin-top:10px"><button class="btn btn-soft btn-sm" id="saveNotes"><svg><use href="#i-check"/></svg>Save</button><button class="btn btn-ghost btn-sm" id="exportNotes">Export</button></div>
           </div>
         </aside>
       </div>
 
       <div class="cls-dock reveal">
-        <button class="dock-tool on" data-tool aria-label="Pen"><svg><use href="#i-pen"/></svg></button>
-        <button class="dock-tool" data-tool aria-label="Highlighter"><svg><use href="#i-wand"/></svg></button>
-        <button class="dock-tool" data-tool aria-label="Eraser"><svg><use href="#i-eraser"/></svg></button>
+        <button class="dock-tool on" data-tool="pen" aria-label="Pen" aria-pressed="true"><svg><use href="#i-pen"/></svg></button>
+        <button class="dock-tool" data-tool="highlighter" aria-label="Highlighter" aria-pressed="false"><svg><use href="#i-wand"/></svg></button>
+        <button class="dock-tool" data-tool="eraser" aria-label="Eraser" aria-pressed="false"><svg><use href="#i-eraser"/></svg></button>
         <span class="dock-sep"></span>
-        <button class="dock-tool" data-tool aria-label="Add note"><svg><use href="#i-notebook"/></svg></button>
-        <button class="dock-tool" data-tool aria-label="Star step"><svg><use href="#i-star"/></svg></button>
-        <button class="dock-tool" data-tool aria-label="Bookmark"><svg><use href="#i-book"/></svg></button>
+        <button class="dock-tool" data-tool="note" aria-label="Add note" aria-pressed="false"><svg><use href="#i-notebook"/></svg></button>
+        <button class="dock-tool" data-tool="star" aria-label="Star step" aria-pressed="false"><svg><use href="#i-star"/></svg></button>
+        <button class="dock-tool" data-tool="bookmark" aria-label="Bookmark" aria-pressed="false"><svg><use href="#i-book"/></svg></button>
         <span class="dock-sep"></span>
         <button class="btn btn-primary btn-sm" data-goview="workspace"><svg><use href="#i-layers"/></svg>Workspace</button>
         <button class="btn btn-ghost btn-sm" data-goview="dashboard">End lesson</button>
@@ -1373,6 +1428,8 @@ img { max-width: 100%; }
   <button data-view="system"><svg><use href="#i-grid"/></svg>System</button>
 </nav>
 
+<div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
 <script>
 (function () {
   "use strict";
@@ -1381,23 +1438,25 @@ img { max-width: 100%; }
 
   /* ---------- data ---------- */
   var subjects = [
-    { e: "∑",  n: "Mathematics",  s: "Calculus · Algebra", p: 62, c: "var(--primary)" },
-    { e: "⚛",  n: "Physics",      s: "Mechanics · Waves",  p: 47, c: "var(--primary-soft)" },
-    { e: "🧪", n: "Chemistry",    s: "Organic · Bonds",     p: 54, c: "var(--secondary)" },
-    { e: "💻", n: "Programming",  s: "Algorithms · Python", p: 78, c: "var(--accent)" },
-    { e: "🧬", n: "Biology",      s: "Genetics · Cells",    p: 41, c: "var(--success)" },
-    { e: "🌍", n: "Geography",    s: "Climate · Mapping",   p: 66, c: "var(--warning)" },
-    { e: "📖", n: "Literature",   s: "Modernism · Poetry",  p: 33, c: "var(--secondary)" },
-    { e: "🇬🇧", n: "English",     s: "Writing · Analysis",  p: 71, c: "var(--primary)" },
-    { e: "🇫🇷", n: "French",      s: "Grammar · Listening", p: 29, c: "var(--accent)" },
-    { e: "📜", n: "History",      s: "Modern era · Sources",p: 58, c: "var(--warning)" }
+    { id: "mathematics", e: "∑",  n: "Mathematics",  s: "Calculus · Algebra", p: 62, c: "var(--primary)", teacher: "Dr. Ada", next: "16:30", lessons: 58, mastery: 84, streak: 12 },
+    { id: "physics", e: "⚛",  n: "Physics",      s: "Mechanics · Waves",  p: 47, c: "var(--primary-soft)", teacher: "Prof. Newton", next: "14:00", lessons: 42, mastery: 71, streak: 8 },
+    { id: "chemistry", e: "🧪", n: "Chemistry",    s: "Organic · Bonds",     p: 54, c: "var(--secondary)", teacher: "Dr. Curie", next: "10:30", lessons: 36, mastery: 68, streak: 5 },
+    { id: "programming", e: "💻", n: "Programming",  s: "Algorithms · Python", p: 78, c: "var(--accent)", teacher: "Prof. Turing", next: "18:00", lessons: 64, mastery: 91, streak: 24 },
+    { id: "biology", e: "🧬", n: "Biology",      s: "Genetics · Cells",    p: 41, c: "var(--success)", teacher: "Dr. Darwin", next: "11:00", lessons: 48, mastery: 63, streak: 3 },
+    { id: "geography", e: "🌍", n: "Geography",    s: "Climate · Mapping",   p: 66, c: "var(--warning)", teacher: "Prof. Humboldt", next: "09:00", lessons: 28, mastery: 79, streak: 7 },
+    { id: "literature", e: "📖", n: "Literature",   s: "Modernism · Poetry",  p: 33, c: "var(--secondary)", teacher: "Prof. Woolf", next: "15:30", lessons: 32, mastery: 57, streak: 2 },
+    { id: "english", e: "🇬🇧", n: "English",     s: "Writing · Analysis",  p: 71, c: "var(--primary)", teacher: "Dr. Austen", next: "13:00", lessons: 40, mastery: 82, streak: 14 },
+    { id: "french", e: "🇫🇷", n: "French",      s: "Grammar · Listening", p: 29, c: "var(--accent)", teacher: "M. Proust", next: "16:00", lessons: 35, mastery: 48, streak: 1 },
+    { id: "history", e: "📜", n: "History",      s: "Modern era · Sources", p: 58, c: "var(--warning)", teacher: "Prof. Braudel", next: "10:00", lessons: 45, mastery: 73, streak: 6 }
   ];
+
+  var currentSubjectId = "mathematics";
 
   function subjectCard(d, i) {
     return '<article class="card subject reveal" style="--i:' + (i % 12) + '">' +
       '<div class="head"><span class="emoji">' + d.e + '</span><div><h3>' + d.n + '</h3><p class="subject-sub">' + d.s + '</p></div></div>' +
       '<div><div class="pct"><span>Progress</span><b>' + d.p + '%</b></div><div class="bar"><i data-w="' + d.p + '" style="background:' + d.c + ';animation:none"></i></div></div>' +
-      '<button class="go" data-goview="subject">Continue<svg><use href="#i-arrow"/></svg></button></article>';
+      '<button class="go" data-goview="subject" data-subject="' + d.id + '">Continue<svg><use href="#i-arrow"/></svg></button></article>';
   }
 
   var grid = document.getElementById("subjectGrid");
@@ -1426,18 +1485,91 @@ img { max-width: 100%; }
     }).join("");
   }
 
+  /* ---------- Phase 2 data + module rendering ---------- */
+  function escapeHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c]; });
+  }
+  function icon(name) { return '<svg aria-hidden="true"><use href="#i-' + name + '"/></svg>'; }
+  function moduleHead(title, sub, action) { return '<header class="module-head"><div><h1>' + title + '</h1><p>' + sub + '</p></div>' + (action || '') + '</header>'; }
+  function resourceRow(iconName, title, meta, tag, action) {
+    return '<div class="resource-row"><span class="resource-ico">' + icon(iconName) + '</span><div class="resource-copy"><b>' + title + '</b><span>' + meta + '</span></div>' + (tag ? '<span class="tag">' + tag + '</span>' : '') + (action || '') + '</div>';
+  }
+  function renderSubjectPage(subjectId) {
+    var d = subjects.filter(function (s) { return s.id === subjectId; })[0] || subjects[0];
+    currentSubjectId = d.id;
+    var heading = document.querySelector("#view-subject .sub-id h1");
+    var eyebrow = document.querySelector("#view-subject .sub-id .eyebrow");
+    var meta = document.querySelector("#view-subject .sub-id .meta");
+    var emoji = document.getElementById("subEmoji");
+    var ring = document.querySelector("#view-subject .ring .fill");
+    var ringLabel = document.querySelector("#view-subject .ring-wrap [data-count]");
+    if (heading) heading.textContent = d.n;
+    if (eyebrow) eyebrow.textContent = "Subject · " + d.n;
+    if (emoji) emoji.textContent = d.e;
+    if (meta) meta.innerHTML = '<span class="chip teacher-chip"><span class="teacher-ico sm" aria-hidden="true">' + icon("brain") + '</span>Teacher · ' + d.teacher + '</span><span class="chip">' + icon("book") + d.s + '</span><span class="chip">' + icon("timer") + 'Next session · ' + d.next + '</span>';
+    if (ring) ring.setAttribute("data-p", d.p);
+    if (ringLabel) { ringLabel.setAttribute("data-count", d.p); ringLabel.dataset.done = ""; ringLabel.textContent = "0"; }
+    SUBJECT.emoji = d.e;
+    renderSubject();
+  }
+  function filterSubjects(filter) {
+    var filtered = subjects.filter(function (s) {
+      if (filter === "progress") return s.p > 0 && s.p < 100;
+      if (filter === "recommended") return s.mastery < 70;
+      if (filter === "completed") return s.p >= 75;
+      return true;
+    });
+    if (gridFull) gridFull.innerHTML = filtered.map(subjectCard).join("");
+    document.querySelectorAll("[data-subject-filter]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-subject-filter") === filter ? "true" : "false"); });
+    activateBars(gridFull);
+  }
+  function renderModule(name) {
+    var root = document.getElementById("moduleRoot");
+    if (!root) return;
+    var html = "";
+    if (name === "teachers") {
+      var teachers = [["Dr. Ada", "Mathematics · AI mentor", "Adaptive calculus sessions", "AA"], ["Prof. Turing", "Programming · AI mentor", "Algorithms studio", "AT"], ["Dr. Curie", "Chemistry · Human teacher", "Office hour · Wed 15:30", "MC"]];
+      html = moduleHead("Teachers", "Your subject mentors, availability, and active learning plans.", '<button class="btn btn-primary btn-sm" data-module-action="book">Book a session' + icon("calendar") + '</button>') + '<div class="module-grid">' + teachers.map(function (t) { return '<article class="card teacher-card"><div class="person"><span class="avatar">' + t[3] + '</span><div class="info"><b>' + t[0] + '</b><span>' + t[1] + '</span></div><span class="tag ok">Available</span></div><p>' + t[2] + '</p><div class="teacher-meta"><span class="tag color">Next: Today</span><span class="tag">4.9 rating</span></div><button class="btn btn-ghost btn-sm" data-module-action="teacher">View teaching plan</button></article>'; }).join("") + '</div><section class="section"><div class="section-head"><div><h2>Upcoming support</h2><p>Short, focused sessions selected for your current lesson.</p></div></div><article class="card module-card">' + resourceRow("calendar", "Calculus clinic", "Today · 16:30 · 25 min", "Dr. Ada", '<button class="btn btn-soft btn-sm" data-module-action="join">Join</button>') + resourceRow("video", "Algorithm review", "Tomorrow · 18:00 · 30 min", "Prof. Turing", '<button class="btn btn-ghost btn-sm" data-module-action="book">Reserve</button>') + '</article></section>';
+    } else if (name === "homework") {
+      html = moduleHead("Homework", "Keep track of what is due, submitted, and ready to review.", '<button class="btn btn-soft btn-sm" data-module-action="filter">Due this week</button>') + '<div class="module-grid sidebar"><article class="card module-card"><h3>Assigned work</h3>' + [
+        ["Integration by Parts — Set 4", "Mathematics · due today at 20:00", "Due today", false], ["Wave motion reflection", "Physics · due tomorrow", "Tomorrow", false], ["Binary search walkthrough", "Programming · submitted", "Submitted", true], ["Molecular bonds map", "Chemistry · due Friday", "Friday", false]
+      ].map(function (t) { return '<label class="task-row"><input class="task-check" type="checkbox" ' + (t[3] ? "checked" : "") + ' aria-label="Mark ' + t[0] + ' complete"><span class="task-copy"><b>' + t[0] + '</b><span>' + t[1] + '</span></span><span class="tag ' + (t[2] === "Due today" ? "warn" : "") + '">' + t[2] + '</span></label>'; }).join("") + '</article><aside class="card module-card"><h3>Submission checklist</h3><p>Finish the remaining three calculations, then attach your working for feedback.</p><div class="bar"><i data-w="63"></i></div><span class="hint">5 of 8 problems complete</span><button class="btn btn-primary btn-block" data-module-action="submit">Submit Set 4</button><button class="btn btn-ghost btn-block" data-goview="library">Open supporting resources</button></aside></div>';
+    } else if (name === "calendar") {
+      var dates = Array.from({ length: 31 }, function (_, i) { return i + 1; });
+      html = moduleHead("Calendar", "October 2026 · lessons, deadlines, and review blocks in one place.", '<div class="filter-bar"><button class="btn btn-ghost btn-sm" data-module-action="previous">Previous</button><button class="btn btn-ghost btn-sm" data-module-action="next">Next</button></div>') + '<article class="card module-card"><div class="calendar-grid">' + ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(function (d) { return '<span class="dow">' + d + '</span>'; }).join("") + dates.map(function (d) { var event = d === 10 ? '<span class="event">Calculus · 16:30</span>' : d === 11 ? '<span class="event due">Set 4 due</span>' : d === 14 ? '<span class="event">Physics lab</span>' : d === 18 ? '<span class="event due">Checkpoint</span>' : ""; return '<div class="calendar-day ' + (d === 10 ? "today" : "") + '"><b>' + d + '</b>' + event + '</div>'; }).join("") + '</div></article><section class="section"><div class="section-head"><div><h2>Coming up</h2><p>Events selected from your active tracks.</p></div></div><div class="module-grid two"><article class="card module-card">' + resourceRow("board", "Live classroom", "Today · 16:30 · Integration by Parts", "Live", '<button class="btn btn-soft btn-sm" data-goview="classroom">Open</button>') + '</article><article class="card module-card">' + resourceRow("homework", "Set 4 deadline", "Today · 20:00 · Mathematics", "Due", '<button class="btn btn-ghost btn-sm" data-goview="homework">Review</button>') + '</article></div></section>';
+    } else if (name === "library") {
+      html = moduleHead("Library", "A working collection of lessons, books, worksheets, and saved resources.", '<button class="btn btn-primary btn-sm" data-module-action="library-search">Search library' + icon("search") + '</button>') + '<div class="library-hero"><article class="card continue-card"><span class="resource-ico">' + icon("play") + '</span><div><p class="eyebrow grad">Continue learning</p><h2 style="margin-top:7px">Integration by Parts</h2><p style="margin-top:6px">Resume the worked example, then open Set 4 when you are ready.</p></div><div class="bar"><i data-w="62"></i></div><div><button class="btn btn-soft btn-sm" data-goview="classroom">Resume lesson</button></div></article><article class="card module-card"><h3>Collections</h3><div class="tag-row"><button class="filter-btn" data-library-filter="all" aria-pressed="true">All</button><button class="filter-btn" data-library-filter="books" aria-pressed="false">Books</button><button class="filter-btn" data-library-filter="lessons" aria-pressed="false">Lessons</button><button class="filter-btn" data-library-filter="saved" aria-pressed="false">Bookmarks</button></div><p>Filter your library without losing your place.</p></article></div><section class="section"><div class="section-head"><div><h2>For your current lesson</h2><p>Relevant resources are grouped by learning context.</p></div></div><article class="card module-card" id="libraryList">' + resourceRow("file", "Integration by Parts — Set 4", "Worksheet · 12 problems · 18 min", "Worksheet", '<button class="btn btn-ghost btn-sm" data-module-action="open-resource">Open</button>') + resourceRow("book", "Calculus formula notebook", "Reference · 34 pages · Bookmarked", "Book", '<button class="btn btn-ghost btn-sm" data-module-action="bookmark">Saved</button>') + resourceRow("video", "Choosing u and dv", "Lesson clip · 8 min", "Lesson", '<button class="btn btn-ghost btn-sm" data-goview="classroom">Watch</button>') + resourceRow("research", "Patterns in repeated integration", "Study note · 5 min read", "Read", '<button class="btn btn-ghost btn-sm" data-module-action="open-resource">Read</button>') + '</article></section>';
+    } else if (name === "notifications") {
+      html = moduleHead("Notifications", "Updates that need your attention, grouped by recency.", '<button class="btn btn-ghost btn-sm" data-module-action="read-all">Mark all read</button>') + '<article class="card module-card" id="noticeList"><p class="eyebrow">Today</p>' + [
+        ["board", "Your Mathematics lesson starts in 30 minutes", "Integration by Parts · 16:30", true], ["homework", "Set 4 is due today", "You have 3 problems left · due 20:00", true], ["spark", "A practice hint is ready", "The AI tutor noticed a repeated error pattern.", true], ["check", "Checkpoint feedback arrived", "You scored 92% on Substitution Deep Dive.", false], ["book", "A saved resource was updated", "Calculus formula notebook · new examples added", false]
+      ].map(function (n) { return '<div class="notice-row ' + (n[3] ? "unread" : "") + '"><span class="notice-ico">' + icon(n[0]) + '</span><div class="notice-copy"><b>' + n[1] + '</b><span>' + n[2] + '</span></div>' + (n[3] ? '<span class="tag color">New</span>' : "") + '</div>'; }).join("") + '</article>';
+    } else if (name === "settings") {
+      html = moduleHead("Settings", "Adjust the learning environment without interrupting your study flow.") + '<div class="module-grid sidebar"><article class="card module-card"><h3>Experience</h3><div class="settings-list">' + [["Focus mode", "Hide secondary panels in the live classroom.", "focus"], ["Lesson reminders", "Receive a reminder before scheduled sessions.", "reminders"], ["Captions by default", "Start live lessons with captions enabled.", "captions"]].map(function (s) { return '<div class="setting-row"><div class="copy"><b>' + s[0] + '</b><span>' + s[1] + '</span></div><button class="switch" data-setting="' + s[2] + '" aria-pressed="' + (s[2] === "captions" ? "true" : "false") + '"><i></i><span class="sr-only">Toggle ' + s[0] + '</span></button></div>'; }).join("") + '</div></article><article class="card module-card"><h3>Accessibility</h3><div class="settings-list"><div class="setting-row"><div class="copy"><b>Reduced motion</b><span>System preference is respected across the app.</span></div><span class="tag ok">System</span></div><div class="setting-row"><div class="copy"><b>Keyboard navigation</b><span>Visible focus rings and skip navigation are enabled.</span></div><span class="tag ok">Enabled</span></div><div class="setting-row"><div class="copy"><b>Text size</b><span>Use your browser controls to scale text.</span></div><button class="btn btn-ghost btn-sm" data-module-action="text-size">Preview</button></div></div></article></div><section class="section"><article class="card module-card"><h3>Account</h3><p>Your learning profile is stored locally for this front-end prototype.</p><div class="row-8"><button class="btn btn-ghost btn-sm" data-goview="profile">View profile</button><button class="btn btn-ghost btn-sm" data-module-action="export-data">Export local notes</button></div></article></section>';
+    } else if (name === "labs" || name === "research") {
+      var isLabs = name === "labs";
+      html = moduleHead(isLabs ? "Virtual Labs" : "Research", isLabs ? "Interactive science activities connected to your active subjects." : "Guided inquiry cards and source-based study prompts.") + '<div class="module-grid two"><article class="card module-card"><span class="resource-ico">' + icon(isLabs ? "atom" : "research") + '</span><h3>' + (isLabs ? "Wave simulator" : "Integration patterns") + '</h3><p>' + (isLabs ? "Explore amplitude and observe how motion changes before your Physics session." : "Compare repeated integration strategies and save evidence to your lesson notes.") + '</p><button class="btn btn-soft btn-sm" data-goview="workspace">Open workspace</button></article><article class="card module-card"><span class="resource-ico">' + icon("book") + '</span><h3>' + (isLabs ? "Lab notebook" : "Source collection") + '</h3><p>Save observations, review prompts, and related library resources in one place.</p><button class="btn btn-ghost btn-sm" data-goview="library">Browse resources</button></article></div>';
+    } else if (name === "search") {
+      var q = (document.getElementById("globalSearch") || {}).value || "";
+      var matches = subjects.filter(function (s) { return !q || (s.n + " " + s.s + " " + s.teacher).toLowerCase().indexOf(q.toLowerCase()) !== -1; }).slice(0, 6);
+      html = moduleHead("Search", q ? 'Results for “' + escapeHtml(q) + '”' : "Search subjects, lessons, teachers, and resources.") + '<div class="search-results">' + (matches.length ? matches.map(function (s) { return '<button class="search-result" data-goview="subject" data-subject="' + s.id + '">' + icon("search") + '<span class="task-copy"><b>' + s.n + '</b><span>' + s.s + ' · ' + s.teacher + '</span></span><span class="tag">Subject</span></button>'; }).join("") : '<article class="card module-card"><h3>No matching resources yet</h3><p>Try a subject, lesson topic, teacher name, or resource type.</p></article>') + '</div>';
+    } else if (name === "profile") {
+      html = moduleHead("Profile", "Your learning identity, achievements, and study rhythm.", '<button class="btn btn-ghost btn-sm" data-goview="settings">Edit preferences</button>') + '<article class="card profile-hero"><span class="profile-avatar">AR</span><div><h1>Alex Rivera</h1><p>Cohort Turing · Semester 2 · Learning since September 2026</p><div class="tag-row" style="margin-top:12px"><span class="tag color">Level 18</span><span class="tag ok">24 day streak</span></div></div></article><section class="section"><div class="module-grid"><article class="card module-card"><p class="eyebrow">Learning time</p><h2>42h 18m</h2><p>Focused study this semester.</p></article><article class="card module-card"><p class="eyebrow">Mastery</p><h2>84%</h2><p>Across 10 active subject tracks.</p></article><article class="card module-card"><p class="eyebrow">XP earned</p><h2>18,420</h2><p>2,180 XP to the next level.</p></article></div></section><section class="section"><div class="module-grid sidebar"><article class="card module-card"><h3>Recent achievements</h3><div class="achievement"><span class="badge-orb">' + icon("target") + '</span><div><b>Precision learner</b><p>Five checkpoint scores above 90%.</p></div></div><div class="achievement"><span class="badge-orb">' + icon("flame") + '</span><div><b>Three-week rhythm</b><p>Studied on 24 consecutive days.</p></div></div><div class="achievement"><span class="badge-orb">' + icon("book") + '</span><div><b>Deep reader</b><p>Finished six supporting resources.</p></div></div></article><aside class="card module-card"><h3>Learning goal</h3><p>Complete the Integration Techniques roadmap by October 24.</p><div class="bar"><i data-w="62"></i></div><span class="hint">62% complete</span><button class="btn btn-soft btn-sm" data-goview="subject">View roadmap</button></aside></div></section>';
+    }
+    root.innerHTML = html;
+  }
+
   /* ---------- view routing ---------- */
   var namedViews = { dashboard: 1, subjects: 1, system: 1, progress: 1, subject: 1, transition: 1, classroom: 1, workspace: 1 };
-  var titles = { teachers: "Teachers", homework: "Homework", calendar: "Calendar", library: "Library", labs: "Virtual Labs", research: "Research", profile: "Profile", notifications: "Notifications", settings: "Settings" };
 
-  function showView(name) {
+  function showView(name, subjectId) {
+    if (subjectId) currentSubjectId = subjectId;
     var target = namedViews[name] ? name : "generic";
     document.querySelectorAll(".view").forEach(function (v) { v.classList.remove("active"); });
     var el = document.getElementById("view-" + target);
     if (el) el.classList.add("active");
-    if (target === "generic") {
-      document.getElementById("genericTitle").textContent = titles[name] || "Module";
-      document.getElementById("genericSub").textContent = "Part of the AI School OS navigation model";
+    if (target === "generic") renderModule(name);
+    if (name === "subject") {
+      renderSubjectPage(currentSubjectId);
     }
     document.querySelectorAll("[data-view]").forEach(function (b) {
       if (b.getAttribute("data-view") === name) b.setAttribute("aria-current", "page");
@@ -1458,6 +1590,7 @@ img { max-width: 100%; }
     if (name === "workspace") initWorkspace();
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
     animateView(el);
+    if (el) { var mainContent = document.getElementById("mainContent"); if (mainContent) mainContent.focus({ preventScroll: true }); }
     closeDrawer();
   }
 
@@ -1465,7 +1598,47 @@ img { max-width: 100%; }
     var trigger = e.target.closest("[data-view],[data-goview]");
     if (!trigger) return;
     var v = trigger.getAttribute("data-view") || trigger.getAttribute("data-goview");
-    if (v) showView(v);
+    var subjectId = trigger.getAttribute("data-subject");
+    if (v) showView(v, subjectId);
+  });
+  document.addEventListener("click", function (e) {
+    var subjectFilter = e.target.closest("[data-subject-filter]");
+    if (subjectFilter) { filterSubjects(subjectFilter.getAttribute("data-subject-filter")); return; }
+    var libraryFilter = e.target.closest("[data-library-filter]");
+    if (libraryFilter) {
+      document.querySelectorAll("[data-library-filter]").forEach(function (b) { b.setAttribute("aria-pressed", b === libraryFilter ? "true" : "false"); });
+      notify("Library filtered to " + libraryFilter.textContent.toLowerCase() + ".");
+      return;
+    }
+    var setting = e.target.closest("[data-setting]");
+    if (setting) {
+      var enabled = setting.getAttribute("aria-pressed") !== "true";
+      setting.setAttribute("aria-pressed", enabled ? "true" : "false");
+      try { localStorage.setItem("ai-school-os:setting:" + setting.getAttribute("data-setting"), enabled ? "1" : "0"); } catch (err) {}
+      return;
+    }
+    var action = e.target.closest("[data-module-action]");
+    if (!action) return;
+    var type = action.getAttribute("data-module-action");
+    if (type === "read-all") { document.querySelectorAll(".notice-row.unread").forEach(function (row) { row.classList.remove("unread"); }); action.textContent = "All caught up"; }
+    else if (type === "submit") { action.textContent = "Submitted"; action.disabled = true; notify("Set 4 submitted for feedback."); }
+    else if (type === "bookmark") { action.textContent = "Saved"; notify("Resource saved to Bookmarks."); }
+    else if (type === "open-resource" || type === "library-search") { notify("Resource opened in the learning workspace."); showView("workspace"); }
+    else if (type === "export-data") { notify("Save notes from the live classroom to export them."); }
+    else if (type === "text-size") { notify("Use your browser zoom controls to preview a larger text size."); }
+    else { notify("This action is ready for your next study session."); }
+  });
+  var globalSearch = document.getElementById("globalSearch");
+  if (globalSearch) {
+    globalSearch.addEventListener("keydown", function (e) { if (e.key === "Enter") showView("search"); });
+    globalSearch.addEventListener("input", function () { if (currentView === "search") { renderModule("search"); activateBars(document.getElementById("view-generic")); } });
+  }
+  var bellBtn = document.getElementById("bellBtn"), profileBtn = document.getElementById("profileBtn");
+  if (bellBtn) bellBtn.addEventListener("click", function () { showView("notifications"); });
+  if (profileBtn) profileBtn.addEventListener("click", function () { showView("profile"); });
+  document.addEventListener("keydown", function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); if (globalSearch) globalSearch.focus(); }
+    if (e.key === "Escape" && currentView === "search") showView("dashboard");
   });
 
   function animateView(scope) {
@@ -1557,7 +1730,7 @@ img { max-width: 100%; }
     var cv = document.getElementById("particles");
     var ctx = cv.getContext("2d");
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var w, h, parts = [];
+    var w, h, parts = [], particleFrame = null, paused = document.hidden;
     function size() {
       w = cv.width = innerWidth * dpr; h = cv.height = innerHeight * dpr;
       cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
@@ -1577,6 +1750,7 @@ img { max-width: 100%; }
     size();
     addEventListener("resize", size);
     function frame() {
+      if (paused) return;
       ctx.clearRect(0, 0, w, h);
       for (var i = 0; i < parts.length; i++) {
         var p = parts[i];
@@ -1588,9 +1762,14 @@ img { max-width: 100%; }
         ctx.arc(p.x, p.y, p.r, 0, 6.283);
         ctx.fill();
       }
-      requestAnimationFrame(frame);
+      particleFrame = requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+    document.addEventListener("visibilitychange", function () {
+      paused = document.hidden;
+      if (!paused && !particleFrame) particleFrame = requestAnimationFrame(frame);
+      if (paused) particleFrame = null;
+    });
+    particleFrame = requestAnimationFrame(frame);
   }
 
   /* ============================================================
@@ -1727,6 +1906,89 @@ img { max-width: 100%; }
     });
   });
 
+  /* ---------- completed classroom interactions ---------- */
+  function notify(message) {
+    var region = document.getElementById("toastRegion");
+    if (!region) return;
+    var toast = document.createElement("div");
+    toast.className = "toast"; toast.textContent = message; region.appendChild(toast);
+    setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 4200);
+  }
+  var activeTool = "pen";
+  document.querySelectorAll(".cls-dock .dock-tool[data-tool]").forEach(function (t) {
+    t.addEventListener("click", function () {
+      activeTool = t.getAttribute("data-tool");
+      document.querySelectorAll(".cls-dock .dock-tool[data-tool]").forEach(function (o) {
+        var selected = o === t; o.classList.toggle("on", selected); o.setAttribute("aria-pressed", selected ? "true" : "false");
+      });
+      if (activeTool === "note") { var notes = document.querySelector("#notesBody textarea"); if (notes) notes.focus(); }
+      if (activeTool === "star") notify("Worked example saved as an important step.");
+      if (activeTool === "bookmark") notify("Lesson bookmark added to your Library.");
+    });
+  });
+  function bindDrawing(canvas) {
+    if (!canvas || canvas.dataset.drawingBound) return;
+    canvas.dataset.drawingBound = "1";
+    var ctx = canvas.getContext("2d"), drawing = false, last = null;
+    function resize() {
+      var rect = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+      if (!rect.width || !rect.height) return;
+      var snapshot = canvas.width && canvas.height ? canvas.toDataURL() : null;
+      canvas.width = Math.round(rect.width * dpr); canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      if (snapshot) { var image = new Image(); image.onload = function () { ctx.drawImage(image, 0, 0, rect.width, rect.height); }; image.src = snapshot; }
+    }
+    function point(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    function draw(to) {
+      if (!last) return;
+      ctx.save(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.globalCompositeOperation = activeTool === "eraser" ? "destination-out" : "source-over";
+      ctx.globalAlpha = activeTool === "highlighter" ? 0.34 : 0.94;
+      ctx.strokeStyle = activeTool === "highlighter" ? "#22D3EE" : "#6D93FF";
+      ctx.lineWidth = activeTool === "eraser" ? 24 : (activeTool === "highlighter" ? 18 : 3);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(to.x, to.y); ctx.stroke(); ctx.restore(); last = to;
+    }
+    canvas.addEventListener("pointerdown", function (e) {
+      if (activeTool !== "pen" && activeTool !== "highlighter" && activeTool !== "eraser") return;
+      drawing = true; last = point(e); canvas.setPointerCapture(e.pointerId);
+      var board = canvas.closest(".cls-board"); if (board) board.classList.add("drawing");
+    });
+    canvas.addEventListener("pointermove", function (e) { if (drawing) draw(point(e)); });
+    function end(e) {
+      if (!drawing) return; drawing = false; last = null;
+      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+      var board = canvas.closest(".cls-board"); if (board) board.classList.remove("drawing");
+    }
+    canvas.addEventListener("pointerup", end); canvas.addEventListener("pointercancel", end);
+    canvas.addEventListener("keydown", function (e) { if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); ctx.clearRect(0, 0, canvas.width, canvas.height); notify("Whiteboard cleared."); } });
+    resize(); window.addEventListener("resize", resize);
+  }
+  bindDrawing(document.getElementById("classCanvas"));
+  var saveNotes = document.getElementById("saveNotes"), exportNotes = document.getElementById("exportNotes");
+  if (saveNotes) saveNotes.addEventListener("click", function () {
+    var note = document.querySelector("#notesBody textarea");
+    try { localStorage.setItem("ai-school-os:lesson-notes", note ? note.value : ""); notify("Lesson notes saved on this device."); } catch (err) { notify("Notes could not be saved in this browser."); }
+  });
+  if (exportNotes) exportNotes.addEventListener("click", function () {
+    var note = document.querySelector("#notesBody textarea"), blob = new Blob([note ? note.value : ""], { type: "text/plain" });
+    var link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = "ai-school-lesson-notes.txt"; link.click(); URL.revokeObjectURL(link.href);
+  });
+  try { var savedNotes = localStorage.getItem("ai-school-os:lesson-notes"); var lessonNotes = document.querySelector("#notesBody textarea"); if (savedNotes && lessonNotes) lessonNotes.value = savedNotes; } catch (err) {}
+  document.querySelectorAll(".cls-controls .ctrl").forEach(function (button) {
+    if (button.id === "micBtn") return;
+    button.addEventListener("click", function () {
+      if (button.classList.contains("danger")) { notify("Lesson ended. Your notes have been kept."); showView("dashboard"); return; }
+      var on = !button.classList.contains("on"); button.classList.toggle("on", on); button.setAttribute("aria-pressed", on ? "true" : "false");
+      notify(on ? "Classroom control enabled." : "Classroom control disabled.");
+    });
+  });
+  var focusModeBtn = document.getElementById("focusModeBtn");
+  if (focusModeBtn) focusModeBtn.addEventListener("click", function () {
+    var on = document.getElementById("view-classroom").classList.toggle("focus-mode");
+    focusModeBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    focusModeBtn.textContent = on ? "Exit focus mode" : "Focus mode";
+  });
+
   /* ---------- learning workspace ---------- */
   var wsPanels = {
     notebook: { t: "Notebook", i: "#i-notebook", x: 0, y: 0, w: 330, h: 540,
@@ -1734,7 +1996,7 @@ img { max-width: 100%; }
          '<div class="ws-code">∫ u dv = uv − ∫ v du\n\n<b>u = x</b>  (algebraic)\ndv = eˣ dx  (exponential)\n\n→ du = dx,  v = eˣ\n→ x·eˣ − ∫ eˣ dx\n→ eˣ (x − 1) + C</div>' +
          '<div style="margin-top:14px"><div class="ws-line"></div><div class="ws-line m"></div><div class="ws-line s"></div><div class="ws-line m"></div></div>' },
     whiteboard: { t: "Whiteboard", i: "#i-board", x: 342, y: 0, w: 520, h: 260,
-      b: '<div class="ws-board-mini"><span>Given  ∫ u dv = uv − ∫ v du</span><span>Step 1  u = x,  dv = eˣ dx</span><span style="color:var(--accent)">Step 2  = x·eˣ − ∫ eˣ dx</span><span>Result  eˣ (x − 1) + C</span></div>' +
+      b: '<div class="ws-board-draw"><span>Given  ∫ u dv = uv − ∫ v du</span><span>Step 1  u = x,  dv = eˣ dx</span><span>Step 2  = x·eˣ − ∫ eˣ dx</span><span>Result  eˣ (x − 1) + C</span><canvas class="draw-canvas" id="wsBoardCanvas" tabindex="0" aria-label="Workspace whiteboard. Use the classroom drawing tools."></canvas></div>' +
          '<div class="tag-row" style="margin-top:12px"><span class="tag color"><svg style="width:13px;height:13px"><use href="#i-pen"/></svg>Pen</span><span class="tag"><svg style="width:13px;height:13px"><use href="#i-eraser"/></svg>Eraser</span><span class="tag">Grid on</span></div>' },
     video: { t: "Video lesson", i: "#i-video", x: 342, y: 272, w: 520, h: 268,
       b: '<div class="ws-video"><button class="pbtn" aria-label="Play"><svg><use href="#i-play"/></svg></button><span class="pbar"><i></i></span></div>' +
@@ -1761,7 +2023,7 @@ img { max-width: 100%; }
     el.dataset.panel = id;
     el.dataset.x = d.x; el.dataset.y = d.y; el.dataset.w = d.w; el.dataset.h = d.h;
     el.innerHTML =
-      '<header class="ws-head"><span class="ws-grip"><svg><use href="#i-drag"/></svg></span>' +
+      '<header class="ws-head" tabindex="0" aria-label="' + d.t + ' panel. Use Alt plus arrow keys to move."><button class="ws-grip" type="button" aria-label="Move ' + d.t + ' panel with Alt plus arrow keys"><svg><use href="#i-drag"/></svg></button>' +
       '<span class="ws-ico"><svg><use href="' + d.i + '"/></svg></span>' +
       '<span class="ws-title">' + d.t + '</span>' +
       '<span class="ws-tools"><button data-wsbtn="collapse" aria-label="Collapse"><svg><use href="#i-chevron"/></svg></button>' +
@@ -1779,6 +2041,19 @@ img { max-width: 100%; }
       if (e.target.closest("[data-wsbtn]")) return;
       if (window.innerWidth <= 900) return;
       dragPanel(e, p, "move");
+    });
+    head.addEventListener("keydown", function (e) {
+      if (!e.altKey || !/^Arrow/.test(e.key) || window.innerWidth <= 900) return;
+      e.preventDefault();
+      var rect = p.parentElement.getBoundingClientRect(), step = 24;
+      var x = parseFloat(p.dataset.x) || 0, y = parseFloat(p.dataset.y) || 0;
+      if (e.key === "ArrowLeft") x -= step;
+      if (e.key === "ArrowRight") x += step;
+      if (e.key === "ArrowUp") y -= step;
+      if (e.key === "ArrowDown") y += step;
+      p.dataset.x = clamp(x, 0, Math.max(0, rect.width - (parseFloat(p.dataset.w) || 300)));
+      p.dataset.y = clamp(y, 0, Math.max(0, rect.height - (parseFloat(p.dataset.h) || 240)));
+      applyGeom(p);
     });
     if (rz) rz.addEventListener("pointerdown", function (e) { dragPanel(e, p, "resize"); });
     p.querySelectorAll("[data-wsbtn]").forEach(function (b) {
@@ -1831,12 +2106,14 @@ img { max-width: 100%; }
     Object.keys(wsPanels).forEach(function (id) {
       var el = wsPanelEl(id); canvas.appendChild(el); bindPanel(el);
     });
+    bindDrawing(canvas.querySelector("#wsBoardCanvas"));
   }
   function addPanel(id) {
     var canvas = document.getElementById("wsCanvas"); if (!canvas || !wsPanels[id]) return;
     var existing = canvas.querySelector('[data-panel="' + id + '"]');
     if (existing) { existing.classList.remove("hidden"); existing.style.zIndex = ++wsZ; return; }
     var el = wsPanelEl(id); canvas.appendChild(el); bindPanel(el);
+    if (id === "whiteboard") bindDrawing(el.querySelector("#wsBoardCanvas"));
     el.style.zIndex = ++wsZ; rescaleCanvas();
   }
   function initWorkspace() {
