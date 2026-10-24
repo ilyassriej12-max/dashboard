@@ -1,0 +1,93 @@
+﻿    <section class="view" id="view-classroom" data-title="Live Classroom">
+      <div class="cls-top">
+        <div class="ttl">
+          <h2>Integration by Parts <span class="live-chip"><i></i>Live</span></h2>
+          <p>Mathematics · Lesson 4 of 9 · Cohort Turing</p>
+        </div>
+        <span class="cls-clock"><svg><use href="#i-timer"/></svg><span id="clsClock">00:00</span></span>
+        <button class="btn btn-ghost btn-sm" id="focusModeBtn" aria-pressed="false"><svg><use href="#i-panel"/></svg>Focus mode</button>
+        <button class="btn btn-soft btn-sm" data-goview="workspace"><svg><use href="#i-layers"/></svg>Open workspace</button>
+      </div>
+
+      <div class="cls-grid">
+        <aside class="card cls-panel cls-timeline reveal">
+          <h3><svg><use href="#i-layers"/></svg>Lesson timeline</h3>
+          <div class="tl">
+            <div class="tl-item done"><span class="dot"><svg><use href="#i-check"/></svg></span><div class="body"><b>Warm-up</b><span>4 min · recall check</span></div></div>
+            <div class="tl-item done"><span class="dot"><svg><use href="#i-check"/></svg></span><div class="body"><b>Concept</b><span>9 min · by-parts rule</span></div></div>
+            <div class="tl-item active"><span class="dot"><svg><use href="#i-play"/></svg></span><div class="body"><b>Worked example</b><span>Now · step 3 of 5</span></div></div>
+            <div class="tl-item"><span class="dot"><svg><use href="#i-target"/></svg></span><div class="body"><b>Guided practice</b><span>10 min · adaptive</span></div></div>
+            <div class="tl-item"><span class="dot"><svg><use href="#i-homework"/></svg></span><div class="body"><b>Checkpoint quiz</b><span>6 min · 5 questions</span></div></div>
+          </div>
+        </aside>
+
+        <div class="cls-stage">
+          <div class="cls-board reveal">
+            <span class="board-grid" aria-hidden="true"></span>
+            <canvas class="draw-canvas" id="classCanvas" tabindex="0" aria-label="Lesson whiteboard. Select a tool, then draw with a pointer. Press Delete to clear your drawing."></canvas>
+            <div class="board-head">
+              <span class="bt">Whiteboard · worked example</span>
+              <span class="tag color" style="margin-left:auto"><svg style="width:13px;height:13px"><use href="#i-pen"/></svg>Teacher is drawing</span>
+            </div>
+            <div class="formula">
+              <div class="f-row"><span class="f-lab">Given</span><span class="f-eq">∫ u dv = uv − ∫ v du</span></div>
+              <div class="f-row"><span class="f-lab">Step 1</span><span class="f-eq">let u = x,  dv = eˣ dx</span></div>
+              <div class="f-row"><span class="f-lab">Step 2</span><span class="f-eq">du = dx,  v = eˣ</span></div>
+              <div class="f-row active"><span class="f-lab">Step 3</span><span class="f-eq">= x·eˣ − ∫ eˣ dx</span></div>
+              <div class="f-row result"><span class="f-lab">Result</span><span class="f-eq">= eˣ (x − 1) + C</span></div>
+            </div>
+            <div class="teacher-presence">
+              <span class="teacher-ico" aria-hidden="true"><svg><use href="#i-brain"/></svg></span>
+              <span class="tp"><b>AI Teacher · Dr. Ada</b><em>Explaining step 3 — isolating the integral</em></span>
+            </div>
+          </div>
+
+          <div class="card cls-controls reveal">
+            <div class="ctrl-group">
+              <button class="ctrl on" id="micBtn" aria-pressed="true" aria-label="Toggle microphone"><svg><use href="#i-mic"/></svg></button>
+              <span class="wave" id="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            </div>
+            <div class="ctrl-group">
+              <button class="ctrl" aria-label="Toggle camera"><svg><use href="#i-cam"/></svg></button>
+              <button class="ctrl" aria-label="Raise hand"><svg><use href="#i-hand"/></svg></button>
+              <button class="ctrl" aria-label="Share screen"><svg><use href="#i-share"/></svg></button>
+              <button class="ctrl on" aria-label="Captions"><svg><use href="#i-captions"/></svg></button>
+              <button class="ctrl danger" aria-label="Leave classroom"><svg><use href="#i-close"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="card cls-panel cls-agent reveal">
+          <h3><svg><use href="#i-brain"/></svg>AI agent activity</h3>
+          <div class="agent-list">
+            <div class="agent-item done"><span class="ad"><svg><use href="#i-target"/></svg></span><div class="ab"><b>Read your last checkpoint</b><span>4/5 correct</span></div></div>
+            <div class="agent-item done"><span class="ad"><svg><use href="#i-trend"/></svg></span><div class="ab"><b>Adjusted difficulty to level 6</b><span>+1 tier</span></div></div>
+            <div class="agent-item done"><span class="ad"><svg><use href="#i-book"/></svg></span><div class="ab"><b>Pulled worked example set B</b><span>3 problems</span></div></div>
+            <div class="agent-item run"><span class="ad"><svg><use href="#i-spark"/></svg></span><div class="ab"><b>Drafting a hint for your next step…</b><span>streaming</span></div></div>
+            <div class="agent-item"><span class="ad"><svg><use href="#i-clock"/></svg></span><div class="ab"><b>Queued: spaced-recall cards</b><span>after lesson</span></div></div>
+          </div>
+          <div class="card" style="background:var(--glass-2);padding:14px;margin-top:14px">
+            <p class="eyebrow" style="margin-bottom:8px">Live transcript</p>
+            <p class="hint">"…so when we integrate eˣ dx we get eˣ again — that is why the pattern repeats."</p>
+          </div>
+          <button class="notes-toggle" id="notesToggle" aria-expanded="true" aria-controls="notesBody"><span>Lesson notes</span><svg><use href="#i-chevron"/></svg></button>
+          <div class="notes-body" id="notesBody">
+            <textarea placeholder="Take notes as the teacher explains…">By parts: ∫u dv = uv − ∫v du. Choose u first (Liate).</textarea>
+            <div class="row-8" style="margin-top:10px"><button class="btn btn-soft btn-sm" id="saveNotes"><svg><use href="#i-check"/></svg>Save</button><button class="btn btn-ghost btn-sm" id="exportNotes">Export</button></div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="cls-dock reveal">
+        <button class="dock-tool on" data-tool="pen" aria-label="Pen" aria-pressed="true"><svg><use href="#i-pen"/></svg></button>
+        <button class="dock-tool" data-tool="highlighter" aria-label="Highlighter" aria-pressed="false"><svg><use href="#i-wand"/></svg></button>
+        <button class="dock-tool" data-tool="eraser" aria-label="Eraser" aria-pressed="false"><svg><use href="#i-eraser"/></svg></button>
+        <span class="dock-sep"></span>
+        <button class="dock-tool" data-tool="note" aria-label="Add note" aria-pressed="false"><svg><use href="#i-notebook"/></svg></button>
+        <button class="dock-tool" data-tool="star" aria-label="Star step" aria-pressed="false"><svg><use href="#i-star"/></svg></button>
+        <button class="dock-tool" data-tool="bookmark" aria-label="Bookmark" aria-pressed="false"><svg><use href="#i-book"/></svg></button>
+        <span class="dock-sep"></span>
+        <button class="btn btn-primary btn-sm" data-goview="workspace"><svg><use href="#i-layers"/></svg>Workspace</button>
+        <button class="btn btn-ghost btn-sm" data-goview="dashboard">End lesson</button>
+      </div>
+    </section>
