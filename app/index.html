@@ -371,7 +371,18 @@
   <script>
     (function () {
       "use strict";
-      window.AppStore.init();
+      (async function () {
+        try {
+          await window.AppStore.initFromAPI();
+        } catch (e) {
+          // API unavailable: keep local mock data, UI stays identical.
+          console.warn("API unavailable, using local mock data:", e);
+        }
+        window.AppStore.init();
+        if (window.showView) {
+          window.showView("dashboard");
+        }
+      })();
     })();
   </script>
 </body>

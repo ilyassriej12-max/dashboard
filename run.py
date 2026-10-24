@@ -1,41 +1,26 @@
-"""AI School OS - Phase 3A frontend entry (static file server).
+"""AI School OS - Phase 3B dev server.
 
-This is a lightweight development server for the refactored frontend.
-It serves the app/ directory so dashboard.html / classroom.html partials
-are loaded over HTTP (required for fetch() of the view partials).
+Launches the FastAPI application which:
+  * exposes the JSON REST API under /api/
+  * serves the refactored frontend from app/ (index.html, dashboard.html,
+    classroom.html, css/, js/, assets/)
 
-Phase 3B will replace this with a FastAPI app mounting /api/dashboard
-and /api/chat.
+Run:
+    python run.py   # then open http://localhost:8000/
 """
 
-from http.server import SimpleHTTPRequestHandler
 import os
-import sys
+import uvicorn
 
-PORT = int(os.environ.get("PORT", "8000"))
 APP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app")
+PORT = int(os.environ.get("PORT", "8000"))
 
 
-class Handler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=APP_DIR, **kwargs)
-
-    def translate_path(self, path):
-        # Serve index.html for the root path.
-        path = super().translate_path(path)
-        if os.path.isdir(path):
-            index = os.path.join(path, "index.html")
-            if os.path.exists(index):
-                return index
-        return path
-
-
-def main():
-    os.chdir(APP_DIR)
-    handler = Handler
-    with __import__("socketserver").TCPServer(("", PORT), handler) as httpd:
-        print(f"AI School OS serving http://localhost:{PORT}/")
-        httpd.serve_forever()
+def main() -> None:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    print(f"AI School OS serving http://localhost:{PORT}/")
+    print(f"Frontend static files: {APP_DIR}")
+    uvicorn.run("core.main:app", host="127.0.0.1", port=PORT, reload=False)
 
 
 if __name__ == "__main__":

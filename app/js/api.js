@@ -502,18 +502,102 @@
     return Store;
   })();
 
+  // Phase 3B: load initial data from the FastAPI backend. Populates the
+  // store so every dashboard / subject / calendar / teacher / homework /
+  // notification read comes from SQLite. Falls back silently to the local
+  // mock data when the API is unavailable, keeping the frontend working
+  // standalone with no visual or behavioural change.
+  Store.prototype.initFromAPI = async function () {
+    var self = this;
+    var endpoints = [
+      "/api/dashboard",
+      "/api/subjects",
+      "/api/teachers",
+      "/api/homework",
+      "/api/calendar",
+      "/api/profile",
+      "/api/settings",
+      "/api/notifications",
+    ];
+    await Promise.all(
+      endpoints.map(function (path) {
+        return fetch(path)
+          .then(function (resp) {
+            return resp.json();
+          })
+          .then(function (data) {
+            switch (path) {
+              case "/api/dashboard":
+                if (data && data.stats) self.set("dashboard", data.stats);
+                if (data && data.subjects) self.set("subjects", data.subjects);
+                break;
+              case "/api/subjects":
+                if (Array.isArray(data)) self.set("subjects", data);
+                break;
+              case "/api/teachers":
+                if (Array.isArray(data)) self.set("teachers", data);
+                break;
+              case "/api/homework":
+                if (Array.isArray(data)) self.set("homework", data);
+                break;
+              case "/api/calendar":
+                if (Array.isArray(data)) self.set("calendarEvents", data);
+                break;
+              case "/api/profile":
+                if (data) self.set("user", data);
+                break;
+              case "/api/settings":
+                if (Array.isArray(data)) {
+                  var prefs = {};
+                  data.forEach(function (s) {
+                    var v = s.value;
+                    if (v === "true") v = true;
+                    else if (v === "false") v = false;
+                    prefs[s.key] = v;
+                  });
+                  self.update("user.preferences", prefs);
+                }
+                break;
+              case "/api/notifications":
+                if (Array.isArray(data)) self.set("notifications", data);
+                break;
+            }
+          })
+          .catch(function (err) {
+            // Per-endpoint failure is acceptable; local mock data stays.
+            console.warn("API endpoint " + path + " unavailable:", err);
+          });
+      })
+    );
+  };
+
   // Create singleton instance
   window.AppStore = new Store();
   window.AppStore.init();
 
   // ============================================================
-  // API CLIENT STUBS (Phase 3B seams)
+  // API CLIENT (Phase 3B)
   // ============================================================
-  // These resolve with local data so the app keeps working with no backend.
-  // To wire Phase 3B, replace the bodies with fetch() calls to /api/dashboard and /api/chat.
+  // fetchDashboard / postChat now hit the FastAPI backend. When the API
+  // is unavailable they fall back to local mock data so the UI never
+  // crashes and keeps looking identical.
 
   window.fetchDashboard = function () {
-    return Promise.resolve(window.AppStore.get("dashboard"));
+    return fetch("/api/dashboard")
+      .then(function (resp) {
+        return resp.json();
+      })
+      .then(function (data) {
+        if (data && data.stats) {
+          window.AppStore.set("dashboard", data.stats);
+        }
+        return data && data.stats
+          ? data.stats
+          : window.AppStore.get("dashboard");
+      })
+      .catch(function () {
+        return window.AppStore.get("dashboard");
+      });
   };
 
   window.postChat = function (message) {

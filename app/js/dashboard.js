@@ -11,10 +11,13 @@
   var escapeHtml = window.escapeHtml;
   var icon = window.icon;
   var showView = window.showView;
-  var subjects = window.AppStore.get("subjects");
+
+  function getSubjects() {
+    return window.AppStore.get("subjects") || [];
+  }
 
   // expose subject list for search module in home.js
-  window.__subjects = subjects.map(function (s) {
+  window.__subjects = getSubjects().map(function (s) {
     return { id: s.id, n: s.name, s: s.description, teacher: s.teacher };
   });
 
@@ -30,6 +33,7 @@
   }
 
   function renderDashboard() {
+    var subjects = getSubjects();
     var grid = document.getElementById("subjectGrid");
     var gridFull = document.getElementById("subjectGridFull");
     if (grid) { grid.innerHTML = subjects.slice(0, 8).map(subjectCard).join(""); }
@@ -64,6 +68,7 @@
   }
 
   function filterSubjects(filter) {
+    var subjects = getSubjects();
     var filtered = subjects.filter(function (s) {
       if (filter === "progress") return s.progress > 0 && s.progress < 100;
       if (filter === "recommended") return s.mastery < 70;
@@ -116,6 +121,7 @@
   ];
 
   function renderSubjectPage(subjectId) {
+    var subjects = getSubjects();
     var d = subjects.filter(function (s) { return s.id === subjectId; })[0] || subjects[0];
     currentSubjectId = d.id;
     SUBJECT.emoji = d.icon;
