@@ -184,3 +184,22 @@ class LessonItem(CamelModel):
     score: Optional[str] = None
     status: Optional[str] = None
 
+
+# ---------------------------------------------------------------------------
+# Chat (AI Foundation - Phase 4.2)
+# ---------------------------------------------------------------------------
+class ChatRequest(CamelModel):
+    message: str
+    teacher: str  # teacher_id
+    student: int  # student_id
+    curriculum: Optional[str] = None
+
+
+class ChatResponse(CamelModel):
+    answer: str
+    teacher: str
+    provider: str
+    model: str
+    timestamp: int
+    tokens: Optional[int] = None
+

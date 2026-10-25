@@ -158,6 +158,73 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 -- ============================================================
+-- conversation history (AI Foundation - Phase 4.1)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS conversation_history (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER NOT NULL,
+  teacher_id TEXT NOT NULL,
+  role TEXT NOT NULL,            -- 'user' or 'assistant'
+  message TEXT NOT NULL,
+  timestamp INTEGER NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);
+
+-- ============================================================
+-- mistakes (AI Foundation - Phase 4.1)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS mistakes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER NOT NULL,
+  subject_id TEXT,
+  topic TEXT NOT NULL,
+  description TEXT,
+  timestamp INTEGER NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+-- ============================================================
+-- weak topics (AI Foundation - Phase 4.1)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS weak_topics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER NOT NULL,
+  subject_id TEXT,
+  topic TEXT NOT NULL,
+  weakness_score REAL NOT NULL DEFAULT 0.0,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+-- ============================================================
+-- strong topics (AI Foundation - Phase 4.1)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS strong_topics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id INTEGER NOT NULL,
+  subject_id TEXT,
+  topic TEXT NOT NULL,
+  strength_score REAL NOT NULL DEFAULT 0.0,
+  FOREIGN KEY (student_id) REFERENCES students(id),
+  FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+-- ============================================================
+-- memory state (AI Foundation - Phase 4.1)
+-- Current curriculum, teacher, and mission per student.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS memory_state (
+  id INTEGER PRIMARY KEY,
+  student_id INTEGER NOT NULL UNIQUE,
+  current_curriculum TEXT,
+  current_teacher_id TEXT,
+  current_mission TEXT,
+  updated_at INTEGER NOT NULL,
+  FOREIGN KEY (student_id) REFERENCES students(id)
+);
+
+-- ============================================================
 -- indexes
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_homework_subject ON homework(subject_id);
@@ -167,3 +234,8 @@ CREATE INDEX IF NOT EXISTS idx_notifications_timestamp ON notifications(timestam
 CREATE INDEX IF NOT EXISTS idx_calendar_date ON calendar(date);
 CREATE INDEX IF NOT EXISTS idx_subjects_progress ON subjects(progress);
 CREATE INDEX IF NOT EXISTS idx_lessons_subject ON lessons(subject_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_student ON conversation_history(student_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_teacher ON conversation_history(teacher_id);
+CREATE INDEX IF NOT EXISTS idx_mistakes_student ON mistakes(student_id);
+CREATE INDEX IF NOT EXISTS idx_weak_topics_student ON weak_topics(student_id);
+CREATE INDEX IF NOT EXISTS idx_strong_topics_student ON strong_topics(student_id);

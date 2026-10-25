@@ -15,12 +15,24 @@ import os
 import time
 from typing import Any, Dict, List, Optional
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Path
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from core.difficulty_engine import DifficultyEngine
+from core.learning import LearningEngine
+from core.memory import Memory
+from core.mission_engine import MissionEngine
+from core.orchestrator import Orchestrator
+from core.prompt_builder import PromptBuilder
+from core.student_model import StudentModel
+from core.teacher_engine import TeacherEngine
+from core.teaching_strategy import StrategySelector
 from core.schemas import (
     CalendarEvent,
+    ChatRequest,
+    ChatResponse,
     DashboardResponse,
     Homework,
     HomeworkCompleteRequest,
@@ -32,7 +44,15 @@ from core.schemas import (
     SettingItem,
     Teacher,
 )
+from services.ai.config import DEFAULT_PROVIDER, FALLBACK_PROVIDER
+from services.ai.base import AIProvider
+from services.ai.gemini import GeminiProvider
+from services.ai.ollama import OllamaProvider
+from services.ai.router import AIRouter
 from services.db.database import DATABASE_PATH, get_conn, init_db
+
+# Load environment variables
+load_dotenv()
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -43,13 +63,124 @@ APP_DIR = os.path.join(PROJECT_ROOT, "app")
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
-app = FastAPI(title="AI School OS API", version="3.1.0")
+app = FastAPI(title="AI School OS API", version="3.2.0")
+
+# ---------------------------------------------------------------------------
+# AI Foundation (Phase 4.2) global instances
+# ---------------------------------------------------------------------------
+_memory = Memory()
+_prompt_builder = PromptBuilder()
+_learning_engine = LearningEngine()
+_router = AIRouter()
+
+# Register available providers
+_ollama = OllamaProvider()
+_gemini = GeminiProvider()
+_router.register(_ollama, priority=10)
+_router.register(_gemini, priority=5)
+
+_orchestrator = Orchestrator()
+
+# Teacher Engine (Phase 4.3) — orchestrates the full teaching pipeline.
+_teacher_engine = TeacherEngine(
+    router=_router,
+    memory=_memory,
+    prompt_builder=_prompt_builder,
+    difficulty_engine=DifficultyEngine(),
+    strategy_selector=StrategySelector(),
+    lesson_planner=None,  # default constructed inside TeacherEngine
+    evaluation_engine=None,
+    feedback_engine=None,
+    mission_engine=MissionEngine(),
+)
 
 
+# ---------------------------------------------------------------------------
+# Startup
+# ---------------------------------------------------------------------------
 @app.on_event("startup")
 def _startup() -> None:
     """Initialise the SQLite database (schema + seed data) on startup."""
     init_db()
+    # Run initial health check for providers (best effort)
+    import asyncio
+
+    try:
+        asyncio.get_event_loop().run_until_complete(_router.health_check())
+    except RuntimeError:
+        # No running event loop yet — health check will run on first request
+        pass
+
+
+# ---------------------------------------------------------------------------
+# API: Chat (AI Foundation - Phase 4.2)
+# ---------------------------------------------------------------------------
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_endpoint(payload: ChatRequest) -> ChatResponse:
+    """Receive a student question, route to the appropriate teacher,
+    generate an AI response, update memory, and return the answer."""
+    # Ensure teacher plugins are discovered
+    _orchestrator.ensure_teachers_loaded()
+
+    # Resolve teacher class
+    teacher_cls = _orchestrator.get_teacher_class(payload.teacher)
+    if teacher_cls is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Teacher '{payload.teacher}' not found",
+        )
+
+    # Instantiate teacher with AI Foundation dependencies
+    teacher = teacher_cls(
+        teacher_id=payload.teacher,
+        subject=payload.teacher,
+        display_name=payload.teacher,
+        router=_router,
+        memory=_memory,
+        prompt_builder=_prompt_builder,
+        learning_engine=_learning_engine,
+        teacher_engine=_teacher_engine,
+    )
+
+    # Route the request
+    decision = _orchestrator.route(
+        payload.message,
+        payload.student,
+        subject=payload.curriculum,
+    )
+
+    # Build context for teacher.ask()
+    context = {
+        "student_id": payload.student,
+        "router": _router,
+        "memory": _memory,
+        "prompt_builder": _prompt_builder,
+        "learning_engine": _learning_engine,
+        "curriculum": payload.curriculum,
+        "routing": decision.to_dict(),
+    }
+
+    # Generate response via TeacherEngine (delegated from teacher.ask())
+    result = await teacher.ask(payload.message, context)
+
+    # Update mission progress / current lesson in memory
+    _memory.set_state(
+        payload.student,
+        current_curriculum=payload.curriculum or _memory.get_state(payload.student).get(
+            "current_curriculum"
+        ),
+        current_teacher_id=payload.teacher,
+        current_mission=payload.message[:80],  # use message as current mission hint
+    )
+
+    return ChatResponse(
+        answer=result.get("text", ""),
+        teacher=payload.teacher,
+        provider=result.get("provider", "unknown"),
+        model=result.get("model", "unknown"),
+        timestamp=int(time.time() * 1000),
+        tokens=result.get("tokens"),
+    )
 
 
 # ---------------------------------------------------------------------------

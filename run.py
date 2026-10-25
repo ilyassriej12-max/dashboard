@@ -1,7 +1,7 @@
-"""AI School OS - Phase 3B dev server.
+"""AI School OS - Phase 3B/4.2 dev server.
 
 Launches the FastAPI application which:
-  * exposes the JSON REST API under /api/
+  * exposes the JSON REST API under /api/ (including /api/chat)
   * serves the refactored frontend from app/ (index.html, dashboard.html,
     classroom.html, css/, js/, assets/)
 
@@ -11,6 +11,10 @@ Run:
 
 import os
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env if present
+load_dotenv()
 
 APP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "app")
 PORT = int(os.environ.get("PORT", "8000"))
