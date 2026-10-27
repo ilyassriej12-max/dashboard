@@ -203,3 +203,188 @@ class ChatResponse(CamelModel):
     timestamp: int
     tokens: Optional[int] = None
 
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Homework
+# ---------------------------------------------------------------------------
+class HomeworkGenerateRequest(CamelModel):
+    student_id: int
+    subject_id: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    num_questions: int = 5
+    difficulty: str = "medium"
+
+
+class HomeworkGenerateResponse(CamelModel):
+    homework_id: str
+    title: str
+    subject: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    difficulty: str
+    num_questions: int
+    time_limit_minutes: int
+    total_points: int
+    due_date: Optional[str] = None
+    estimated_time: Optional[int] = None
+    questions: List[dict]
+
+
+class HomeworkSubmitRequest(CamelModel):
+    student_id: int
+    homework_id: str
+    answers: Dict[str, str]  # question_id -> answer text
+    time_spent_minutes: int = 0
+
+
+class HomeworkSubmitResponse(CamelModel):
+    homework_id: str
+    student_id: int
+    total_score: float
+    max_score: int
+    percentage: float
+    grade: str
+    passed: bool
+    time_spent_minutes: int
+    feedback: str
+    recommendations: List[str]
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Quiz
+# ---------------------------------------------------------------------------
+class QuizGenerateRequest(CamelModel):
+    student_id: int
+    subject_id: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    num_questions: int = 10
+    difficulty: str = "medium"
+
+
+class QuizGenerateResponse(CamelModel):
+    quiz_id: str
+    title: str
+    subject: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    difficulty: str
+    num_questions: int
+    time_limit_minutes: int
+    total_points: int
+    questions: List[dict]
+
+
+class QuizSubmitRequest(CamelModel):
+    student_id: int
+    quiz_id: str
+    answers: Dict[str, str]
+    time_spent_minutes: int = 0
+
+
+class QuizSubmitResponse(CamelModel):
+    quiz_id: str
+    student_id: int
+    total_score: float
+    max_score: int
+    percentage: float
+    grade: str
+    passed: bool
+    time_spent_minutes: int
+    feedback: str
+    recommendations: List[str]
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Exam
+# ---------------------------------------------------------------------------
+class ExamGenerateRequest(CamelModel):
+    student_id: int
+    subject_id: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    exam_type: str = "practice"  # practice, chapter, semester, regional, bac_simulation
+    num_questions: int = 20
+    difficulty: str = "advanced"
+
+
+class ExamGenerateResponse(CamelModel):
+    exam_id: str
+    title: str
+    subject: str
+    chapter_id: str
+    lesson_id: str
+    competency: str
+    exam_type: str
+    difficulty: str
+    num_questions: int
+    time_limit_minutes: int
+    total_points: int
+    questions: List[dict]
+
+
+class ExamSubmitRequest(CamelModel):
+    student_id: int
+    exam_id: str
+    answers: Dict[str, str]
+    time_spent_minutes: int = 0
+
+
+class ExamSubmitResponse(CamelModel):
+    exam_id: str
+    student_id: int
+    exam_type: str
+    total_score: float
+    max_score: int
+    percentage: float
+    grade: str
+    passed: bool
+    time_spent_minutes: int
+    feedback: str
+    recommendations: List[str]
+    barème: str
+    competency_analysis: List[dict]
+    mistake_summary: List[dict]
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Timeline
+# ---------------------------------------------------------------------------
+class TimelineEvent(CamelModel):
+    id: int
+    student_id: int
+    event_type: str
+    subject_id: Optional[str] = None
+    lesson_id: Optional[str] = None
+    chapter_id: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    score: Optional[float] = None
+    timestamp: int
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Learning Statistics
+# ---------------------------------------------------------------------------
+class LearningStatistic(CamelModel):
+    id: int
+    student_id: int
+    period_type: str
+    period_start: str
+    period_end: str
+    total_study_time_minutes: int
+    lessons_completed: int
+    quizzes_taken: int
+    exams_taken: int
+    average_quiz_score: Optional[float] = None
+    average_exam_score: Optional[float] = None
+    completion_rate: float
+    subject_id: Optional[str] = None
+    updated_at: int
+

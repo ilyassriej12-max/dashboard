@@ -28,13 +28,18 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from core.competency_tracker import CompetencyTracker
+from core.curriculum_engine import CurriculumEngine
 from core.difficulty_engine import DifficultyAssessment, DifficultyEngine
 from core.evaluation import EvaluationEngine, EvaluationResult
+from core.exam_engine import ExamEngine
 from core.feedback import FeedbackEngine, FeedbackResult
+from core.knowledge_graph import KnowledgeGraph
 from core.lesson_planner import LessonPlanner
 from core.memory import Memory
 from core.mission_engine import MissionEngine, MissionProgress
 from core.prompt_builder import PromptBuilder
+from core.progress_tracker import ProgressTracker
 from core.student_model import StudentModel
 from core.teaching_strategy import StrategySelector, TeachingStrategy
 from core.teacher import Teacher
@@ -104,6 +109,11 @@ class TeachingResult:
     mission: Dict[str, Any]
     tool: Dict[str, Any]
     student_model: Dict[str, Any]
+    requested_teacher_id: Optional[str] = None
+    learning_decision: str = "continue"
+    current_lesson: Optional[str] = None
+    current_chapter: Optional[str] = None
+    competencies: List[str] = field(default_factory=list)
 
 
 class TeacherEngine:
@@ -146,7 +156,12 @@ class TeacherEngine:
         evaluation_engine: Optional[EvaluationEngine] = None,
         feedback_engine: Optional[FeedbackEngine] = None,
         mission_engine: Optional[MissionEngine] = None,
-    ) -> None:
+    curriculum_engine: Optional[CurriculumEngine] = None,
+    knowledge_graph: Optional[KnowledgeGraph] = None,
+    progress_tracker: Optional[ProgressTracker] = None,
+    competency_tracker: Optional[CompetencyTracker] = None,
+    exam_engine: Optional[ExamEngine] = None,
+) -> None:
         self.router = router
         self.memory = memory
         self.prompt_builder = prompt_builder
@@ -156,6 +171,11 @@ class TeacherEngine:
         self.evaluation_engine = evaluation_engine or EvaluationEngine()
         self.feedback_engine = feedback_engine or FeedbackEngine()
         self.mission_engine = mission_engine or MissionEngine()
+        self.curriculum_engine = curriculum_engine or CurriculumEngine()
+        self.knowledge_graph = knowledge_graph or KnowledgeGraph()
+        self.progress_tracker = progress_tracker or ProgressTracker()
+        self.competency_tracker = competency_tracker or CompetencyTracker()
+        self.exam_engine = exam_engine or ExamEngine()
 
     # ------------------------------------------------------------------
     # Main pipeline
@@ -191,6 +211,128 @@ class TeacherEngine:
         """
         ctx = context or {}
 
+        # --- Phase 5.5: Curriculum Integration ---
+        # Resolve the subject this teacher teaches.
+        subject_id = self.curriculum_engine.get_subject_for_teacher(teacher.teacher_id)
+        if subject_id is None:
+            subject_id = teacher.subject
+
+        # Get the current lesson for this student in this subject.
+        current_lesson_id = self.progress_tracker.get_current_lesson(
+            student_id, subject_id
+        )
+        completed_lessons = self.progress_tracker.get_completed_lessons(
+            student_id, subject_id
+        )
+
+        # Load current chapter/lesson/competencies/objectives.
+        current_chapter = None
+        current_lesson = None
+        competencies: List[str] = []
+        lesson_objectives: List[str] = []
+        chapter_id: Optional[str] = None
+
+        if current_lesson_id:
+            current_lesson = self.curriculum_engine.get_lesson(current_lesson_id)
+            if current_lesson:
+                chapter_id = current_lesson.chapter_id
+                current_chapter = self.curriculum_engine.get_chapter(chapter_id)
+                competencies = current_chapter.competencies if current_chapter else []
+                lesson_objectives = current_lesson.learning_objectives
+
+        # --- Phase 5.5: Knowledge Graph Integration ---
+        # Check prerequisites before teaching.
+        if current_lesson_id and not self.knowledge_graph.can_start_lesson(
+            current_lesson_id,
+            set(completed_lessons),
+            {
+                c_id: c.score
+                for c_id, c in self.competency_tracker.get_all_mastery(
+                    student_id, subject_id
+                ).items()
+            },
+        ):
+            blocking = self.knowledge_graph.get_blocking_lesson_prerequisites(
+                current_lesson_id,
+                set(completed_lessons),
+                {
+                    c_id: c.score
+                    for c_id, c in self.competency_tracker.get_all_mastery(
+                        student_id, subject_id
+                    ).items()
+                },
+            )
+            # Prerequisite missing: explain it first, do not continue.
+            prereq_lesson = (
+                self.curriculum_engine.get_lesson(blocking[0])
+                if blocking
+                else None
+            )
+            prereq_name = prereq_lesson.title if prereq_lesson else blocking[0] if blocking else "previous lesson"
+
+            # Record this attempt.
+            self.progress_tracker.update_progress(
+                student_id=student_id,
+                subject_id=subject_id,
+                lesson_id=current_lesson_id,
+                increment_attempts=True,
+            )
+
+            return TeachingResult(
+                text=(
+                    f"قبل ما ن继续، خاص نتحقق من {prereq_name} أولا. "
+                    f"هذا الدرس يحتاج لمعرفة سابقة قبل ما نبدأ فيه."
+                ),
+                provider="none",
+                model="none",
+                tokens=None,
+                difficulty="beginner",
+                strategy="revision",
+                lesson_plan=lesson_plan.to_dict() if lesson_plan else {},
+                evaluation={
+                    "is_complete": False,
+                    "is_structured": False,
+                    "matches_curriculum": True,
+                    "answers_question": False,
+                    "confidence": 1.0,
+                    "feedback_notes": [f"Prerequisite missing: {prereq_name}"],
+                    "score": 0.0,
+                    "metadata": {},
+                },
+                feedback={
+                    "message": f"Please review {prereq_name} first before continuing.",
+                    "feedback_type": "needs_revision",
+                    "encouragement": True,
+                    "suggested_action": f"Review {prereq_name} then return to this lesson.",
+                },
+                mission={
+                    "mission_id": "",
+                    "title": "",
+                    "progress_percent": 0,
+                    "completed": False,
+                    "remaining": 0,
+                    "xp_milestone": None,
+                    "unlocked": False,
+                },
+                tool={"needed": False, "tool_name": None, "reason": "Prerequisite check"},
+                student_model={
+                    "student_id": model.student_id,
+                    "knowledge_level": model.knowledge_level,
+                    "learning_style": model.learning_style,
+                    "recent_mistakes": model.recent_mistakes,
+                    "strong_topics": model.strong_topics,
+                    "weak_topics": model.weak_topics,
+                    "attention": model.attention,
+                    "mission_progress": model.mission_progress,
+                    "current_curriculum": model.current_curriculum,
+                },
+                requested_teacher_id=None,
+                learning_decision="repeat",
+                current_lesson=current_lesson_id,
+                current_chapter=chapter_id,
+                competencies=competencies,
+            )
+
         # --- Step 1-3: Analyze student + read memory ---
         # Determine difficulty first (needs memory for weak/strong topics).
         difficulty_assessment: DifficultyAssessment = (
@@ -225,6 +367,43 @@ class TeacherEngine:
         # --- Step 6: Determine tool need ---
         tool_decision = self._decide_tool(message, strategy, difficulty)
 
+        # --- Phase 5.5: Progress Integration ---
+        # Mark current lesson as in-progress and increment attempts.
+        if current_lesson_id:
+            self.progress_tracker.mark_in_progress(
+                student_id=student_id,
+                subject_id=subject_id,
+                lesson_id=current_lesson_id,
+            )
+            self.progress_tracker.update_progress(
+                student_id=student_id,
+                subject_id=subject_id,
+                lesson_id=current_lesson_id,
+                increment_attempts=True,
+            )
+
+        # --- Phase 5.5: PromptBuilder Integration ---
+        # Build adaptive context for the prompt.
+        progress_summary = self.progress_tracker.get_progress_summary(
+            student_id, subject_id
+        )
+        all_mastery = self.competency_tracker.get_all_mastery(student_id, subject_id)
+        weak_comps = [
+            {"id": c.competency_id, "name": c.name, "score": c.score}
+            for c in self.competency_tracker.get_weak_competencies(
+                student_id, subject_id
+            )
+        ]
+        strong_comps = [
+            {"id": c.competency_id, "name": c.competency_id, "score": c.score}
+            for c in self.competency_tracker.get_strong_competencies(
+                student_id, subject_id
+            )
+        ]
+        avg_mastery = self.competency_tracker.get_average_mastery(
+            student_id, subject_id
+        )
+
         # --- Step 7: Generate prompt ---
         history = self.memory.get_history(student_id, limit=10)
         history_chronological = list(reversed(history))
@@ -245,9 +424,16 @@ class TeacherEngine:
                 "Adapt your explanation to the student's difficulty level "
                 "and learning style. Follow the selected teaching strategy."
             ),
+            current_chapter=current_chapter.title if current_chapter else None,
+            current_lesson=current_lesson.title if current_lesson else None,
+            competencies=[c.name for c in competencies] if competencies else [],
+            lesson_objectives=lesson_objectives,
+            progress=progress_summary,
+            weak_competencies=weak_comps,
+            strong_competencies=strong_comps,
+            average_mastery=avg_mastery,
+            student_id=student_id,
         )
-
-        # --- Step 8-10: Call AI (with fallback) ---
         generation_result = await self._generate_with_fallback(
             router=self.router,
             preferred_model=teacher.model_preference,
@@ -288,6 +474,75 @@ class TeacherEngine:
             model=model,
             difficulty=difficulty,
         )
+
+        # --- Step 14: Check for teacher calling (handoff request) ---
+        # A teacher may request another teacher to handle this request.
+        # This does NOT execute the handoff — it only prepares the
+        # routing information for future phases.
+        requested_teacher_id: Optional[str] = None
+        if teacher is not None:
+            requested_teacher_id = teacher.request_teacher(message)
+
+        # --- Phase 5.5: Competency Integration ---
+        # After every interaction, update competency mastery.
+        if current_lesson_id and current_chapter:
+            for comp_id in current_chapter.competencies:
+                # Score based on evaluation: complete+answered = 80, else 40
+                if evaluation.is_complete and evaluation.answers_question:
+                    score = 80.0
+                elif evaluation.answers_question:
+                    score = 50.0
+                else:
+                    score = 30.0
+                self.competency_tracker.update_mastery(
+                    student_id=student_id,
+                    subject_id=subject_id,
+                    competency_id=comp_id,
+                    score=score,
+                )
+
+        # --- Phase 5.5: Progress Integration ---
+        # Complete lesson if evaluation was successful.
+        if current_lesson_id and evaluation.is_complete and evaluation.answers_question:
+            self.progress_tracker.mark_completed(
+                student_id=student_id,
+                subject_id=subject_id,
+                lesson_id=current_lesson_id,
+                score=evaluation.score * 100,
+            )
+
+        # --- Phase 5.5: Teacher Memory Integration ---
+        # Remember last lesson, homework, quiz, exam, mistake, revision.
+        self.memory.set_state(
+            student_id,
+            current_curriculum=subject_id,
+            current_teacher_id=teacher.teacher_id,
+            current_mission=message[:80],
+        )
+
+        # --- Phase 5.5: Learning Decision ---
+        # TeacherEngine decides automatically what to do next.
+        weak_count = len(self.competency_tracker.get_weak_competencies(
+            student_id, subject_id
+        ))
+        strong_count = len(self.competency_tracker.get_strong_competencies(
+            student_id, subject_id
+        ))
+        completed_count = len(self.progress_tracker.get_completed_lessons(
+            student_id, subject_id
+        ))
+
+        if not evaluation.answers_question:
+            learning_decision = "repeat"
+        elif weak_count > strong_count and weak_count > 0:
+            learning_decision = "revision"
+        elif evaluation.is_complete and evaluation.answers_question and strong_count >= 3:
+            # Ready for homework/quiz
+            learning_decision = "homework"
+        elif evaluation.is_complete and evaluation.answers_question:
+            learning_decision = "continue"
+        else:
+            learning_decision = "continue"
 
         # --- Return structured result ---
         return TeachingResult(
@@ -339,6 +594,11 @@ class TeacherEngine:
                 "mission_progress": model.mission_progress,
                 "current_curriculum": model.current_curriculum,
             },
+            requested_teacher_id=requested_teacher_id,
+            learning_decision=learning_decision,
+            current_lesson=current_lesson_id,
+            current_chapter=chapter_id,
+            competencies=[c.name for c in competencies] if competencies else [],
         )
 
     # ------------------------------------------------------------------

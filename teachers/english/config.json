@@ -1,0 +1,138 @@
+{
+  "name": "English",
+  "subject": "English",
+  "model": "gemini-1.5-flash",
+  "priority": 8,
+  "allowed_tools": ["whiteboard"],
+  "curriculum": ["Grammar", "Literature", "Writing", "Poetry", "Reading Comprehension"],
+  "keywords": ["english", "literature", "grammar", "writing", "poem", "poetry", "essay", "reading", "novel", "author", "syntax", "punctuation", "sentence"],
+  "personality": "inspiring, articulate, literature-loving",
+  "description": "Adaptive English tutor for literature, writing, and grammar",
+  "explanation_style": "concept-first",
+  "reasoning_style": "inductive",
+  "vocabulary": ["grammar", "syntax", "vocabulary", "metaphor", "theme", "character", "plot", "tone"],
+  "examples": ["analyze a poem", "write an essay", "correct grammar", "identify themes"],
+  "preferred_lesson_flow": ["introduction", "explanation", "examples", "exercises", "reflection"],
+  "correction_style": "gentle",
+  "teaching_personality": "inspiring, articulate, literature-loving",
+  "objectives": ["improve writing skills", "expand vocabulary", "understand literature", "master grammar"],
+  "restrictions": [],
+  "keywords": ["english", "literature", "grammar", "writing", "poem", "poetry", "essay", "reading", "novel", "author", "syntax", "punctuation", "sentence"],
+  "homework_rules": "Writing practice, reading comprehension, vocabulary building",
+  "revision_rules": "Grammar review, vocabulary review, essay practice",
+  "exercise_types": ["grammar", "writing", "speaking", "reading", "vocabulary"],
+  "evaluation_rules": ["grammar", "vocabulary", "fluency", "comprehension"],
+  "common_mistakes": ["tense mistakes", "article mistakes", "vocabulary misuse"],
+  "difficulty_preference": "beginner",
+  "curriculum": {
+    "subject": "English",
+    "chapters": [
+      {
+        "chapter_id": "grammar_basics",
+        "title": "Grammar Basics",
+        "description": "English grammar fundamentals: parts of speech, sentence structure",
+        "lessons": [
+          {
+            "lesson_id": "eng_grammar_1",
+            "title": "Parts of Speech",
+            "description": "Parts of speech: nouns, verbs, adjectives, adverbs, pronouns, prepositions, conjunctions",
+            "content": "Parts of speech: nouns, verbs, adjectives, adverbs, pronouns, prepositions, conjunctions, interjections",
+            "key_concepts": ["noun", "verb", "adjective", "adverb", "pronoun", "preposition", "conjunction", "interjection"],
+            "learning_objectives": ["Identify parts of speech", "Use parts of speech correctly", "Identify parts of speech in sentences"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 45,
+            "difficulty": "beginner",
+            "order": 1
+          },
+          {
+            "lesson_id": "eng_grammar_2",
+            "title": "Sentence Structure",
+            "description": "Subject, predicate, subject-verb agreement, sentence types",
+            "content": "Subject and predicate, subject-verb agreement, simple, compound, complex sentences",
+            "key_concepts": ["subject", "predicate", "subject-verb agreement", "simple sentence", "compound sentence", "complex sentence"],
+            "learning_objectives": ["Identify subject and predicate", "Ensure subject-verb agreement", "Identify sentence types"],
+            "prerequisites": ["eng_grammar_1"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "beginner",
+            "order": 2
+          },
+          {
+            "lesson_id": "eng_grammar_3",
+            "title": "Tenses",
+            "description": "English verb tenses: present, past, future, perfect, progressive",
+            "content": "English verb tenses: present simple, present continuous, past simple, past continuous, future simple, present perfect, past perfect",
+            "key_concepts": ["present simple", "present continuous", "past simple", "past continuous", "future simple", "present perfect", "past perfect"],
+            "learning_objectives": ["Use present, past, and future tenses correctly", "Use present perfect and past perfect", "Choose correct tense for context"],
+            "prerequisites": ["eng_grammar_2"],
+            "estimated_duration_minutes": 75,
+            "difficulty": "intermediate",
+            "order": 3
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "parts_of_speech",
+            "name": "Parts of Speech",
+            "description": "Understand parts of speech: nouns, verbs, adjectives, adverbs, pronouns, prepositions, conjunctions",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "sentence_structure",
+            "name": "Sentence Structure",
+            "description": "Understand subject, predicate, subject-verb agreement, sentence types",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["parts_of_speech"]
+          },
+          {
+            "id": "verb_tenses",
+            "name": "Verb Tenses",
+            "description": "Understand and use English verb tenses correctly",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["parts_of_speech", "sentence_structure"]
+          }
+        ],
+        "objectives": [
+          "Understand parts of speech",
+          "Understand subject, predicate, and subject-verb agreement",
+          "Use English verb tenses correctly"
+        ],
+        "estimated_duration_minutes": 165,
+        "difficulty": "beginner",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "parts_of_speech",
+        "name": "Parts of Speech",
+        "description": "Understand parts of speech: nouns, verbs, adjectives, adverbs, pronouns, prepositions, conjunctions",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "sentence_structure",
+        "name": "Sentence Structure",
+        "description": "Understand subject, predicate, subject-verb agreement, sentence types",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["parts_of_speech"]
+      },
+      {
+        "id": "verb_tenses",
+        "name": "Verb Tenses",
+        "description": "Understand and use English verb tenses correctly",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["parts_of_speech", "sentence_structure"]
+      }
+    ],
+    "objectives": [
+      "Understand parts of speech",
+      "Understand subject, predicate, and subject-verb agreement",
+      "Use English verb tenses correctly"
+    ],
+    "estimated_duration_minutes": 165,
+    "difficulty": "beginner",
+    "order": 1
+  }
+}

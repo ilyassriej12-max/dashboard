@@ -600,12 +600,165 @@
       });
   };
 
-  window.postChat = function (message) {
-    return Promise.resolve({
-      reply: "API not yet connected. This is the Phase 3A stub for /api/chat.",
-      echo: message,
-      timestamp: new Date().toISOString()
-    });
+  window.postChat = function (message, teacherId, studentId) {
+    return fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: message,
+        teacher: teacherId || "mathematics",
+        student: studentId || 1,
+        curriculum: null,
+      }),
+    })
+      .then(function (resp) {
+        if (!resp.ok) {
+          throw new Error("Chat API error: " + resp.status);
+        }
+        return resp.json();
+      })
+      .then(function (data) {
+        return {
+          reply: data.answer || data.reply || "",
+          echo: message,
+          timestamp: new Date().toISOString(),
+        };
+      })
+      .catch(function () {
+        return {
+          reply: "API not yet connected. This is the Phase 3A stub for /api/chat.",
+          echo: message,
+          timestamp: new Date().toISOString(),
+        };
+      });
+  };
+
+  // ============================================================
+  // Phase 5.6: Homework / Quiz / Exam / Timeline / Stats API
+  // ============================================================
+  window.generateHomework = function (payload) {
+    return fetch("/api/homework/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Homework generate error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Homework generate unavailable:", err);
+        return null;
+      });
+  };
+
+  window.submitHomework = function (payload) {
+    return fetch("/api/homework/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Homework submit error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Homework submit unavailable:", err);
+        return null;
+      });
+  };
+
+  window.generateQuiz = function (payload) {
+    return fetch("/api/quiz/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Quiz generate error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Quiz generate unavailable:", err);
+        return null;
+      });
+  };
+
+  window.submitQuiz = function (payload) {
+    return fetch("/api/quiz/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Quiz submit error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Quiz submit unavailable:", err);
+        return null;
+      });
+  };
+
+  window.generateExam = function (payload) {
+    return fetch("/api/exam/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Exam generate error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Exam generate unavailable:", err);
+        return null;
+      });
+  };
+
+  window.submitExam = function (payload) {
+    return fetch("/api/exam/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Exam submit error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Exam submit unavailable:", err);
+        return null;
+      });
+  };
+
+  window.fetchTimeline = function (studentId, limit) {
+    var url = "/api/timeline?student_id=" + (studentId || 1);
+    if (limit) url += "&limit=" + limit;
+    return fetch(url)
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Timeline error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Timeline unavailable:", err);
+        return [];
+      });
+  };
+
+  window.fetchLearningStats = function (studentId, periodType, subjectId) {
+    var url = "/api/stats?student_id=" + (studentId || 1);
+    if (periodType) url += "&period_type=" + periodType;
+    if (subjectId) url += "&subject_id=" + subjectId;
+    return fetch(url)
+      .then(function (resp) {
+        if (!resp.ok) throw new Error("Stats error: " + resp.status);
+        return resp.json();
+      })
+      .catch(function (err) {
+        console.warn("Stats unavailable:", err);
+        return [];
+      });
   };
 
 })();

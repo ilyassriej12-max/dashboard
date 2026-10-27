@@ -1,0 +1,138 @@
+{
+  "name": "Chemistry",
+  "subject": "Chemistry",
+  "model": "gemini-1.5-flash",
+  "priority": 7,
+  "allowed_tools": ["whiteboard"],
+  "curriculum": ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry", "Biochemistry", "Analytical Chemistry"],
+  "keywords": ["chemistry", "chemical", "molecule", "reaction", "element", "compound", "acid", "base", "organic", "inorganic", "periodic", "atom", "bond", "oxidation", "reduction"],
+  "personality": "meticulous, safety-conscious, experiment-driven",
+  "description": "Adaptive chemistry tutor with molecular and reaction explanations",
+  "explanation_style": "visual",
+  "reasoning_style": "deductive",
+  "vocabulary": ["molecule", "atom", "bond", "reaction", "compound", "element", "acid", "base", "oxidation", "reduction"],
+  "examples": ["balance equation", "draw molecular structure", "identify reaction type", "calculate molar mass"],
+  "preferred_lesson_flow": ["introduction", "explanation", "examples", "exercises", "reflection"],
+  "correction_style": "gentle",
+  "teaching_personality": "meticulous, safety-conscious, experiment-driven",
+  "objectives": ["understand molecular structure", "balance chemical equations", "explain reaction mechanisms"],
+  "restrictions": [],
+  "keywords": ["chemistry", "chemical", "molecule", "reaction", "element", "compound", "acid", "base", "organic", "inorganic", "periodic", "atom", "bond", "oxidation", "reduction"],
+  "homework_rules": "Balancing practice, reaction prediction, laboratory questions",
+  "revision_rules": "Periodic table, reactions, formulas, lab safety",
+  "exercise_types": ["reaction balancing", "equation completion", "formula writing", "laboratory analysis", "conceptual questions"],
+  "evaluation_rules": ["balanced equations", "formula correctness", "chemical reasoning", "concept understanding"],
+  "common_mistakes": ["balancing errors", "incorrect formulas", "oxidation mistakes", "periodic table confusion"],
+  "difficulty_preference": "beginner",
+  "curriculum": {
+    "subject": "Chemistry",
+    "chapters": [
+      {
+        "chapter_id": "atomic_structure",
+        "title": "Atomic Structure",
+        "description": "Atomic structure, periodic table, and electron configuration",
+        "lessons": [
+          {
+            "lesson_id": "chem_atomic_1",
+            "title": "Atomic Structure",
+            "description": "Structure of the atom: protons, neutrons, electrons",
+            "content": "Structure of the atom: protons, neutrons, electrons, electron configuration, orbitals",
+            "key_concepts": ["proton", "neutron", "electron", "electron configuration", "orbitals"],
+            "learning_objectives": ["Understand atomic structure", "Write electron configurations", "Understand orbitals"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 60,
+            "difficulty": "beginner",
+            "order": 1
+          },
+          {
+            "lesson_id": "chem_atomic_2",
+            "title": "Periodic Table",
+            "description": "Periodic table organization and periodic trends",
+            "content": "Periodic table organization, groups, periods, periodic trends (atomic radius, ionization energy, electronegativity)",
+            "key_concepts": ["periodic table", "groups", "periods", "atomic radius", "ionization energy", "electronegativity"],
+            "learning_objectives": ["Understand periodic table organization", "Identify trends in atomic radius, ionization energy, electronegativity", "Predict chemical behavior based on position"],
+            "prerequisites": ["chem_atomic_1"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "beginner",
+            "order": 2
+          },
+          {
+            "lesson_id": "chem_atomic_3",
+            "title": "Electron Configuration",
+            "description": "Electron configuration and valence electrons",
+            "content": "Electron configuration rules, valence electrons, noble gas configuration, exceptions",
+            "key_concepts": ["electron configuration", "valence electrons", "noble gas configuration", "Hund's rule", "Pauli exclusion principle"],
+            "learning_objectives": ["Write electron configurations", "Identify valence electrons", "Apply Hund's rule and Pauli exclusion principle"],
+            "prerequisites": ["chem_atomic_1"],
+            "estimated_duration_minutes": 75,
+            "difficulty": "intermediate",
+            "order": 3
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "atomic_structure",
+            "name": "Atomic Structure",
+            "description": "Understand atomic structure: protons, neutrons, electrons",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "periodic_table",
+            "name": "Periodic Table",
+            "description": "Understand periodic table organization and trends",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["atomic_structure"]
+          },
+          {
+            "id": "electron_configuration",
+            "name": "Electron Configuration",
+            "description": "Write electron configurations and understand valence electrons",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["atomic_structure"]
+          }
+        ],
+        "objectives": [
+          "Understand atomic structure",
+          "Write electron configurations",
+          "Understand periodic table trends"
+        ],
+        "estimated_duration_minutes": 195,
+        "difficulty": "beginner",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "atomic_structure",
+        "name": "Atomic Structure",
+        "description": "Understand structure of the atom: protons, neutrons, electrons",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "periodic_table",
+        "name": "Periodic Table",
+        "description": "Understand periodic table organization and trends",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["atomic_structure"]
+      },
+      {
+        "id": "electron_configuration",
+        "name": "Electron Configuration",
+        "description": "Write electron configurations and understand valence electrons",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["atomic_structure"]
+      }
+    ],
+    "objectives": [
+      "Understand atomic structure",
+      "Write electron configurations",
+      "Understand periodic table trends"
+    ],
+    "estimated_duration_minutes": 195,
+    "difficulty": "beginner",
+    "order": 1
+  }
+}

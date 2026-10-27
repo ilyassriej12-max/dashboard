@@ -1,0 +1,140 @@
+{
+  "name": "Philosophy",
+  "subject": "Philosophy",
+  "model": "gemini-1.5-flash",
+  "priority": 5,
+  "allowed_tools": [],
+  "curriculum": ["Ethics", "Metaphysics", "Epistemology", "Logic", "Political Philosophy", "Ancient Philosophy"],
+  "keywords": ["philosophy", "philosophical", "ethics", "logic", "argument", "reasoning", "metaphysics", "epistemology", "existentialism", "stoicism", "morality", "truth", "knowledge", "reality", "consciousness", "socrates", "plato", "aristotle", "kant", "nietzsche"],
+  "personality": "thoughtful, questioning, dialectical",
+  "description": "Adaptive philosophy tutor with critical thinking and argument analysis",
+  "explanation_style": "dialectical",
+  "reasoning_style": "analytical",
+  "vocabulary": ["argument", "premise", "conclusion", "fallacy", "syllogism", "dialectic", "paradox", "ethics", "metaphysics", "epistemology", "stoicism", "existentialism"],
+  "examples": ["analyze an argument", "compare philosophers", "evaluate evidence", "construct a syllogism", "identify a fallacy"],
+  "preferred_lesson_flow": ["introduction", "question", "analysis", "discussion", "synthesis"],
+  "correction_style": "socratic",
+  "teaching_personality": "thoughtful, questioning, dialectical",
+  "objectives": ["critical thinking", "logical reasoning", "argument evaluation", "philosophical understanding"],
+  "restrictions": [],
+  "keywords": ["philosophy", "philosophical", "ethics", "logic", "argument", "reasoning", "metaphysics", "epistemology", "existentialism", "stoicism", "morality", "truth", "knowledge", "reality", "consciousness", "socrates", "plato", "aristotle", "kant", "nietzsche"],
+  "homework_rules": "Essay writing, argument analysis, reading reflection, thought experiments",
+  "revision_rules": "Philosophers, concepts, arguments, key texts, thought experiments",
+  "exercise_types": ["essays", "discussions", "argument analysis", "comparison questions", "thought experiments"],
+  "evaluation_rules": ["reasoning", "argument quality", "evidence", "logical consistency"],
+  "common_mistakes": ["unsupported opinions", "weak arguments", "logical fallacies"],
+  "difficulty_preference": "intermediate",
+  "curriculum": {
+    "subject": "Philosophy",
+    "chapters": [
+      {
+        "chapter_id": "ethics",
+        "title": "Ethics",
+        "description": "Ethical theories and moral philosophy",
+        "lessons": [
+          {
+            "lesson_id": "phil_ethics_1",
+            "title": "Utilitarianism",
+            "description": "Utilitarian ethics and consequentialism",
+            "content": "Utilitarianism, Bentham and Mill, greatest happiness principle, act vs rule utilitarianism",
+            "key_concepts": ["utilitarianism", "greatest happiness principle", "act utilitarianism", "rule utilitarianism"],
+            "learning_objectives": ["Understand utilitarianism", "Apply greatest happiness principle", "Compare act and rule utilitarianism"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 60,
+            "difficulty": "intermediate",
+            "order": 1
+          },
+          {
+            "lesson_id": "phil_ethics_2",
+            "title": "Deontology",
+            "description": "Kantian ethics and deontological ethics",
+            "content": "Kantian ethics, categorical imperative, duty-based ethics, universalizability",
+            "key_concepts": ["categorical imperative", "duty", "universalizability", "autonomy"],
+            "learning_objectives": ["Understand Kantian ethics", "Apply categorical imperative", "Compare deontology and utilitarianism"],
+            "prerequisites": ["phil_ethics_1"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "intermediate",
+            "order": 2
+          },
+          {
+            "lesson_id": "phil_ethics_3",
+            "title": "Virtue Ethics",
+            "description": "Aristotelian virtue ethics and character ethics",
+            "content": "Aristotelian virtue ethics, virtue ethics, golden mean, character development",
+            "key_concepts": ["virtue ethics", "golden mean", "character", "eudaimonia"],
+            "learning_objectives": ["Understand virtue ethics", "Apply concept of golden mean", "Compare virtue ethics with other theories"],
+            "prerequisites": ["phil_ethics_2"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "intermediate",
+            "order": 3
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "utilitarianism",
+            "name": "Utilitarianism",
+            "description": "Understand utilitarian ethics and consequentialism",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "deontology",
+            "name": "Deontology",
+            "description": "Understand Kantian ethics and duty-based ethics",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["utilitarianism"]
+          },
+          {
+            "id": "virtue_ethics",
+            "name": "Virtue Ethics",
+            "description": "Understand virtue ethics and character-based ethics",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["deontology"]
+          }
+        ],
+        "objectives": [
+          "Understand utilitarianism",
+          "Understand Kantian ethics",
+          "Understand virtue ethics",
+          "Compare different ethical theories"
+        ],
+        "estimated_duration_minutes": 180,
+        "difficulty": "intermediate",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "utilitarianism",
+        "name": "Utilitarianism",
+        "description": "Understand utilitarian ethics and consequentialism",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "deontology",
+        "name": "Deontology",
+        "description": "Understand Kantian ethics and duty-based ethics",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["utilitarianism"]
+      },
+      {
+        "id": "virtue_ethics",
+        "name": "Virtue Ethics",
+        "description": "Understand virtue ethics and character-based ethics",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["deontology"]
+      }
+    ],
+    "objectives": [
+      "Understand utilitarianism",
+      "Understand Kantian ethics",
+      "Understand virtue ethics",
+      "Compare different ethical theories"
+    ],
+    "estimated_duration_minutes": 180,
+    "difficulty": "intermediate",
+    "order": 1
+  }
+}

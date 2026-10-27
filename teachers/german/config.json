@@ -1,0 +1,140 @@
+{
+  "name": "German",
+  "subject": "German",
+  "model": "gemini-1.5-flash",
+  "priority": 5,
+  "allowed_tools": [],
+  "curriculum": ["Grammar", "Vocabulary", "Sentence Construction", "Speaking", "Listening", "Exam Preparation"],
+  "keywords": ["german", "deutsch", "grammar", "vocabulary", "sentence", "verb", "noun", "article", "case", "conjugation", "translation", "pronunciation", "umlaut"],
+  "personality": "logical, hands-on, problem-solving",
+  "description": "Adaptive German tutor with grammar focus and vocabulary building",
+  "explanation_style": "hands-on",
+  "reasoning_style": "algorithmic",
+  "vocabulary": ["noun", "verb", "adjective", "article", "case", "sentence", "sentence structure", "conjugation", "umlaut", "dative", "accusative", "nominative", "genitive"],
+  "examples": ["translate this sentence", "conjugate the verb", "identify the case", "build a sentence", "declinate the noun"],
+  "preferred_lesson_flow": ["vocabulary", "grammar", "sentence construction", "practice", "review"],
+  "correction_style": "review",
+  "teaching_personality": "logical, hands-on, problem-solving",
+  "objectives": ["master German grammar", "build vocabulary", "construct sentences", "speak confidently", "understand German culture"],
+  "restrictions": [],
+  "keywords": ["german", "deutsch", "grammar", "vocabulary", "sentence", "verb", "noun", "article", "case", "conjugation", "translation", "pronunciation", "umlaut"],
+  "homework_rules": "Translation practice, grammar exercises, vocabulary building, sentence construction",
+  "revision_rules": "Grammar rules, verb conjugations, vocabulary lists, sentence structure",
+  "exercise_types": ["translation", "grammar", "sentence building", "vocabulary", "conjugation", "case identification"],
+  "evaluation_rules": ["grammar", "vocabulary", "sentence structure", "verb conjugation", "case usage"],
+  "common_mistakes": ["articles", "cases", "verb position", "word order", "gender confusion"],
+  "difficulty_preference": "beginner",
+  "curriculum": {
+    "subject": "German",
+    "chapters": [
+      {
+        "chapter_id": "grammar_basics",
+        "title": "German Grammar Basics",
+        "description": "German grammar fundamentals: nouns, articles, cases, verbs",
+        "lessons": [
+          {
+            "lesson_id": "ger_grammar_1",
+            "title": "Nouns and Articles",
+            "description": "German nouns, gender, and definite/indefinite articles",
+            "content": "German nouns, gender (masculine, feminine, neuter), definite and indefinite articles",
+            "key_concepts": ["noun gender", "definite article", "indefinite article", "gender rules"],
+            "learning_objectives": ["Identify noun gender", "Use definite and indefinite articles", "Apply gender rules"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 45,
+            "difficulty": "beginner",
+            "order": 1
+          },
+          {
+            "lesson_id": "ger_grammar_2",
+            "title": "German Cases",
+            "description": "German case system: nominative, accusative, dative, genitive",
+            "content": "German case system: nominative, accusative, dative, genitive, case usage",
+            "key_concepts": ["nominative", "accusative", "dative", "genitive", "case usage"],
+            "learning_objectives": ["Understand German case system", "Identify case of nouns", "Use correct case in sentences"],
+            "prerequisites": ["ger_grammar_1"],
+            "estimated_duration_minutes": 75,
+            "difficulty": "intermediate",
+            "order": 2
+          },
+          {
+            "lesson_id": "ger_grammar_3",
+            "title": "Verb Conjugation",
+            "description": "German verb conjugation: present tense, regular and irregular verbs",
+            "content": "German verb conjugation: present tense, regular and irregular verbs, stem-changing verbs",
+            "key_concepts": ["verb conjugation", "present tense", "regular verbs", "irregular verbs", "stem-changing verbs"],
+            "learning_objectives": ["Conjugate regular verbs in present tense", "Conjugate irregular verbs", "Identify stem-changing verbs"],
+            "prerequisites": ["ger_grammar_1"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "intermediate",
+            "order": 3
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "nouns_articles",
+            "name": "Nouns and Articles",
+            "description": "Understand German noun gender and articles",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "cases",
+            "name": "German Cases",
+            "description": "Understand German case system",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["nouns_articles"]
+          },
+          {
+            "id": "verb_conjugation",
+            "name": "Verb Conjugation",
+            "description": "Conjugate German verbs in present tense",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["nouns_articles"]
+          }
+        ],
+        "objectives": [
+          "Understand German noun gender",
+          "Use definite and indefinite articles correctly",
+          "Understand German case system",
+          "Conjugate regular and irregular verbs in present tense"
+        ],
+        "estimated_duration_minutes": 180,
+        "difficulty": "beginner",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "nouns_articles",
+        "name": "Nouns and Articles",
+        "description": "Understand German noun gender and articles",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "cases",
+        "name": "German Cases",
+        "description": "Understand German case system",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["nouns_articles"]
+      },
+      {
+        "id": "verb_conjugation",
+        "name": "Verb Conjugation",
+        "description": "Conjugate German verbs in present tense",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["nouns_articles"]
+      }
+    ],
+    "objectives": [
+      "Understand German noun gender",
+      "Use definite and indefinite articles correctly",
+      "Understand German case system",
+      "Conjugate regular and irregular verbs in present tense"
+    ],
+    "estimated_duration_minutes": 180,
+    "difficulty": "beginner",
+    "order": 1
+  }
+}

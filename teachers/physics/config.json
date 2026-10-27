@@ -1,0 +1,138 @@
+{
+  "name": "Physics",
+  "subject": "Physics",
+  "model": "gemini-1.5-flash",
+  "priority": 9,
+  "allowed_tools": ["whiteboard", "calculator"],
+  "curriculum": ["Mechanics", "Waves", "Thermodynamics", "Electromagnetism", "Quantum Physics"],
+  "keywords": ["physics", "mechanics", "waves", "energy", "force", "motion", "quantum", "relativity", "electricity", "magnetism", "thermodynamics", "particle", "atom", "photon"],
+  "personality": "curious, analytical, experiment-loving",
+  "description": "Adaptive physics tutor with conceptual and mathematical explanations",
+  "explanation_style": "concept-first",
+  "reasoning_style": "deductive",
+  "vocabulary": ["force", "energy", "mass", "velocity", "acceleration", "momentum", "wave", "particle", "field"],
+  "examples": ["calculate force", "explain wave motion", "solve kinematics problem", "derive formula"],
+  "preferred_lesson_flow": ["introduction", "explanation", "examples", "exercises", "reflection"],
+  "correction_style": "gentle",
+  "teaching_personality": "curious, analytical, experiment-loving",
+  "objectives": ["understand physical concepts", "apply formulas correctly", "connect theory to real world"],
+  "restrictions": [],
+  "keywords": ["physics", "mechanics", "waves", "energy", "force", "motion", "quantum", "relativity", "electricity", "magnetism", "thermodynamics", "particle", "atom", "photon"],
+  "homework_rules": "Numerical practice, conceptual questions, unit conversion",
+  "revision_rules": "Formulas, laws, applications, problem-solving",
+  "exercise_types": ["numerical problems", "conceptual questions", "unit conversion", "derivations"],
+  "evaluation_rules": ["concept understanding", "equation usage", "unit correctness", "reasoning"],
+  "common_mistakes": ["wrong units", "incorrect formulas", "misunderstanding concepts"],
+  "difficulty_preference": "beginner",
+  "curriculum": {
+    "subject": "Physics",
+    "chapters": [
+      {
+        "chapter_id": "mechanics",
+        "title": "Mechanics",
+        "description": "Classical mechanics: motion, forces, energy, momentum",
+        "lessons": [
+          {
+            "lesson_id": "phys_mech_1",
+            "title": "Kinematics: Motion in One Dimension",
+            "description": "Position, velocity, acceleration, and motion in one dimension",
+            "content": "Position, velocity, acceleration, equations of motion for constant acceleration",
+            "key_concepts": ["position", "velocity", "acceleration", "equations of motion"],
+            "learning_objectives": ["Understand position, velocity, acceleration", "Apply kinematic equations", "Solve one-dimensional motion problems"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 60,
+            "difficulty": "beginner",
+            "order": 1
+          },
+          {
+            "lesson_id": "phys_mech_2",
+            "title": "Newton's Laws of Motion",
+            "description": "Newton's three laws of motion and force analysis",
+            "content": "Newton's three laws, free body diagrams, net force, equilibrium",
+            "key_concepts": ["Newton's laws", "force", "free body diagram", "net force", "equilibrium"],
+            "learning_objectives": ["Understand Newton's three laws", "Draw free body diagrams", "Apply Newton's laws to solve problems"],
+            "prerequisites": ["phys_mech_1"],
+            "estimated_duration_minutes": 75,
+            "difficulty": "intermediate",
+            "order": 2
+          },
+          {
+            "lesson_id": "phys_mech_3",
+            "title": "Work, Energy, and Power",
+            "description": "Work, kinetic energy, potential energy, conservation of energy",
+            "content": "Work done by forces, kinetic energy, potential energy, conservation of mechanical energy, power",
+            "key_concepts": ["work", "kinetic energy", "potential energy", "conservation of energy", "power"],
+            "learning_objectives": ["Understand work and energy", "Apply conservation of energy", "Calculate power"],
+            "prerequisites": ["phys_mech_2"],
+            "estimated_duration_minutes": 75,
+            "difficulty": "intermediate",
+            "order": 3
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "kinematics",
+            "name": "Kinematics",
+            "description": "Understand motion, position, velocity, and acceleration",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "newtons_laws",
+            "name": "Newton's Laws",
+            "description": "Understand Newton's laws of motion and force analysis",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["kinematics"]
+          },
+          {
+            "id": "work_energy",
+            "name": "Work and Energy",
+            "description": "Understand work, kinetic energy, potential energy, conservation of energy",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["newtons_laws"]
+          }
+        ],
+        "objectives": [
+          "Understand position, velocity, and acceleration",
+          "Apply Newton's laws of motion",
+          "Understand work, energy, and conservation of energy"
+        ],
+        "estimated_duration_minutes": 210,
+        "difficulty": "beginner",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "kinematics",
+        "name": "Kinematics",
+        "description": "Understand motion, position, velocity, and acceleration",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "newtons_laws",
+        "name": "Newton's Laws",
+        "description": "Understand Newton's laws of motion and force analysis",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["kinematics"]
+      },
+      {
+        "id": "work_energy",
+        "name": "Work and Energy",
+        "description": "Understand work, kinetic energy, potential energy, conservation of energy",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["newtons_laws"]
+      }
+    ],
+    "objectives": [
+      "Understand motion, velocity, and acceleration",
+      "Apply Newton's laws of motion",
+      "Understand work, kinetic energy, and conservation of energy"
+    ],
+    "estimated_duration_minutes": 210,
+    "difficulty": "beginner",
+    "order": 1
+  }
+}

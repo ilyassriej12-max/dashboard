@@ -1,4 +1,4 @@
-"""AI School OS — Phase 4.1 teacher plugin loader.
+"""AI School OS — Phase 4.4 teacher plugin loader.
 
 Automatically discovers teacher implementations from the
 ``teachers/*`` directory tree without manual imports.  Each teacher
@@ -7,6 +7,16 @@ subclass.
 
 Future teachers work simply by creating a new folder under
 ``teachers/`` — no changes to this loader are required.
+
+Each teacher plugin folder should contain:
+
+* ``teacher.py`` — defines a :class:`BaseTeacher` subclass
+* ``config.json`` — teacher metadata (name, subject, model, tools, curriculum, keywords)
+* ``persona.md`` — teacher personality/teaching style text
+
+The loader automatically discovers every teacher folder.  If a new
+folder appears later (e.g. ``teachers/history/``), the system loads it
+automatically with no code modification.
 """
 
 from __future__ import annotations
@@ -17,6 +27,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Type
 
 from core.teacher import Teacher
+from core.memory import Memory
+from core.prompt_builder import PromptBuilder
+from core.learning import LearningEngine
+from core.teacher_engine import TeacherEngine
+from services.ai.router import AIRouter
 
 # Resolve the teachers directory relative to the project root.
 # This file lives at <root>/core/loader.py, so:
@@ -28,13 +43,32 @@ TEACHERS_DIR = _PROJECT_ROOT / "teachers"
 _teachers: Dict[str, Type[Teacher]] = {}
 
 
-def load_teachers() -> Dict[str, Type[Teacher]]:
+def load_teachers(
+    router: Optional[AIRouter] = None,
+    memory: Optional[Memory] = None,
+    prompt_builder: Optional[PromptBuilder] = None,
+    learning_engine: Optional[LearningEngine] = None,
+    teacher_engine: Optional[TeacherEngine] = None,
+) -> Dict[str, Type[Teacher]]:
     """Auto-discover and load every teacher under ``teachers/*``.
 
     Scans each immediate subdirectory of ``teachers/`` for a Python
     module (``__init__.py`` or ``teacher.py``) that defines at least
-    one concrete subclass of :class:`Teacher`.  Discovered classes are
+    one concrete subclass of :class:`BaseTeacher`.  Discovered classes are
     registered in the internal registry and returned.
+
+    Parameters
+    ----------
+    router:
+        Optional :class:`AIRouter` instance passed to each teacher.
+    memory:
+        Optional :class:`Memory` instance passed to each teacher.
+    prompt_builder:
+        Optional :class:`PromptBuilder` instance passed to each teacher.
+    learning_engine:
+        Optional :class:`LearningEngine` instance passed to each teacher.
+    teacher_engine:
+        Optional :class:`TeacherEngine` instance passed to each teacher.
 
     Returns
     -------
@@ -85,9 +119,11 @@ def load_teachers() -> Dict[str, Type[Teacher]]:
                     # the class for later instantiation by the caller.
                     try:
                         instance = attr(
-                            teacher_id=entry.name,
-                            subject=entry.name,
-                            display_name=entry.name.replace("_", " ").title(),
+                            router=router,
+                            memory=memory,
+                            prompt_builder=prompt_builder,
+                            learning_engine=learning_engine,
+                            teacher_engine=teacher_engine,
                         )
                         _teachers[instance.teacher_id] = attr
                     except Exception:

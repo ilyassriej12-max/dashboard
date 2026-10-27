@@ -22,6 +22,10 @@ class PromptBuilder:
     provider can consume.  The builder is teacher-agnostic: it accepts
     whatever context the caller supplies and concatenates it in a
     deterministic order.
+
+    When a :class:`Teacher` instance is passed, the builder
+    automatically injects teacher persona, rules, style, examples,
+    objectives, and restrictions from the teacher's configuration.
     """
 
     # ------------------------------------------------------------------
@@ -29,6 +33,7 @@ class PromptBuilder:
     # ------------------------------------------------------------------
     SYSTEM_HEADER = "You are an AI teacher in the AI School OS system.\n"
     PERSONA_TEMPLATE = "\n## Teacher Persona\n{display_name} teaches {subject}.\n{description}\n"
+    PERSONA_DETAILS_TEMPLATE = "\n## Teacher Rules\n{persona}\n"
     CURRICULUM_TEMPLATE = "\n## Supported Curriculum\n{curriculum}\n"
     MEMORY_TEMPLATE = "\n## Student Memory\n{memory}\n"
     LEARNING_STYLE_TEMPLATE = "\n## Learning Style\n{learning_style}\n"
@@ -36,6 +41,29 @@ class PromptBuilder:
     MISSION_TEMPLATE = "\n## Current Mission\n{mission}\n"
     HISTORY_TEMPLATE = "\n## Conversation History\n{history}\n"
     INSTRUCTION_TEMPLATE = "\n## System Instructions\n{instructions}\n"
+    CONFIG_TEMPLATE = "\n## Teacher Config\n{config}\n"
+
+    # Phase 5.1: Teacher intelligence templates
+    EXPLANATION_STYLE_TEMPLATE = "\n## Explanation Style\n{style}\n"
+    REASONING_STYLE_TEMPLATE = "\n## Reasoning Style\n{style}\n"
+    VOCABULARY_TEMPLATE = "\n## Preferred Vocabulary\n{words}\n"
+    EXAMPLES_TEMPLATE = "\n## Example Topics\n{examples}\n"
+    OBJECTIVES_TEMPLATE = "\n## Learning Objectives\n{objectives}\n"
+    RESTRICTIONS_TEMPLATE = "\n## Restrictions\n{restrictions}\n"
+
+    # Phase 5.3: Teacher intelligence - subject-specific templates
+    HOMEWORK_RULES_TEMPLATE = "\n## Homework Rules\n{rules}\n"
+    REVISION_RULES_TEMPLATE = "\n## Revision Rules\n{rules}\n"
+    EXERCISE_TYPES_TEMPLATE = "\n## Exercise Types\n{types}\n"
+    EVALUATION_RULES_TEMPLATE = "\n## Evaluation Rules\n{rules}\n"
+    COMMON_MISTAKES_TEMPLATE = "\n## Common Mistakes\n{mistakes}\n"
+
+    # Phase 5.5: Adaptive learning context templates
+    CURRENT_LESSON_TEMPLATE = "\n## Current Lesson\n{chapter} — {lesson}\n"
+    COMPETENCIES_TEMPLATE = "\n## Competencies\n{competencies}\n"
+    LESSON_OBJECTIVES_TEMPLATE = "\n## Lesson Objectives\n{objectives}\n"
+    PROGRESS_TEMPLATE = "\n## Learning Progress\n{progress}\n"
+    MASTERY_TEMPLATE = "\n## Competency Mastery\n{mastery}\n"
 
     # ------------------------------------------------------------------
     # Build
@@ -54,6 +82,14 @@ class PromptBuilder:
         system_instructions: Optional[str] = None,
         student_id: Optional[int] = None,
         memory_store: Optional[Memory] = None,
+        current_chapter: Optional[str] = None,
+        current_lesson: Optional[str] = None,
+        competencies: Optional[List[str]] = None,
+        lesson_objectives: Optional[List[str]] = None,
+        progress: Optional[Dict[str, Any]] = None,
+        weak_competencies: Optional[List[Dict[str, Any]]] = None,
+        strong_competencies: Optional[List[Dict[str, Any]]] = None,
+        average_mastery: Optional[float] = None,
     ) -> str:
         """Assemble all supplied context into a single prompt string.
 
@@ -65,7 +101,9 @@ class PromptBuilder:
         teacher:
             Optional :class:`Teacher` instance.  If provided, its
             metadata (name, subject, description, curriculum) is used
-            to populate the persona and curriculum sections.
+            to populate the persona and curriculum sections, and its
+            intelligence attributes (persona, rules, style, examples,
+            objectives, restrictions) are automatically injected.
         persona:
             Override for the teacher persona section text.
         curriculum:
@@ -108,6 +146,61 @@ class PromptBuilder:
                 subject=teacher.subject,
                 description=teacher.description,
             ))
+            # Full persona text from persona.md
+            if getattr(teacher, "persona", None) is not None:
+                parts.append(self.PERSONA_DETAILS_TEMPLATE.format(
+                    persona=teacher.persona,
+                ))
+            # Explanation style
+            if getattr(teacher, "explanation_style", None) is not None:
+                parts.append(self.EXPLANATION_STYLE_TEMPLATE.format(
+                    style=teacher.explanation_style,
+                ))
+            # Reasoning style
+            if getattr(teacher, "reasoning_style", None) is not None:
+                parts.append(self.REASONING_STYLE_TEMPLATE.format(
+                    style=teacher.reasoning_style,
+                ))
+            # Vocabulary
+            if getattr(teacher, "vocabulary", None) is not None:
+                vocab_text = ", ".join(teacher.vocabulary)
+                parts.append(self.VOCABULARY_TEMPLATE.format(words=vocab_text))
+            # Examples
+            if getattr(teacher, "examples", None) is not None:
+                examples_text = "\n".join(f"- {e}" for e in teacher.examples)
+                parts.append(self.EXAMPLES_TEMPLATE.format(examples=examples_text))
+            # Objectives
+            if getattr(teacher, "objectives", None) is not None:
+                obj_text = "\n".join(f"- {o}" for o in teacher.objectives)
+                parts.append(self.OBJECTIVES_TEMPLATE.format(objectives=obj_text))
+            # Restrictions
+            if getattr(teacher, "restrictions", None) is not None:
+                rest_text = "\n".join(f"- {r}" for r in teacher.restrictions)
+                parts.append(self.RESTRICTIONS_TEMPLATE.format(restrictions=rest_text))
+
+            # Phase 5.3: Teacher-specific sections
+            # Homework rules
+            if getattr(teacher, "config", None) and teacher.config.get("homework_rules"):
+                parts.append(self.HOMEWORK_RULES_TEMPLATE.format(rules=teacher.config["homework_rules"]))
+
+            # Revision rules
+            if getattr(teacher, "config", None) and teacher.config.get("revision_rules"):
+                parts.append(self.REVISION_RULES_TEMPLATE.format(rules=teacher.config["revision_rules"]))
+
+            # Exercise types
+            if getattr(teacher, "config", None) and teacher.config.get("exercise_types"):
+                ex_text = "\n".join(f"- {e}" for e in teacher.config["exercise_types"])
+                parts.append(self.EXERCISE_TYPES_TEMPLATE.format(types=ex_text))
+
+            # Evaluation rules
+            if getattr(teacher, "config", None) and teacher.config.get("evaluation_rules"):
+                ev_text = "\n".join(f"- {e}" for e in teacher.config["evaluation_rules"])
+                parts.append(self.EVALUATION_RULES_TEMPLATE.format(rules=ev_text))
+
+            # Common mistakes
+            if getattr(teacher, "config", None) and teacher.config.get("common_mistakes"):
+                cm_text = "\n".join(f"- {m}" for m in teacher.config["common_mistakes"])
+                parts.append(self.COMMON_MISTAKES_TEMPLATE.format(mistakes=cm_text))
 
         # --- Curriculum ---
         topics = curriculum or (teacher.supported_curriculum if teacher else [])
@@ -115,10 +208,76 @@ class PromptBuilder:
             curriculum_text = "\n".join(f"- {t}" for t in topics)
             parts.append(self.CURRICULUM_TEMPLATE.format(curriculum=curriculum_text))
 
+        # --- Teacher config ---
+        if teacher is not None and getattr(teacher, "config", None):
+            cfg = teacher.config
+            config_lines = []
+            if cfg.get("name"):
+                config_lines.append(f"Name: {cfg['name']}")
+            if cfg.get("subject"):
+                config_lines.append(f"Subject: {cfg['subject']}")
+            if cfg.get("model"):
+                config_lines.append(f"Model: {cfg['model']}")
+            if cfg.get("priority") is not None:
+                config_lines.append(f"Priority: {cfg['priority']}")
+            if cfg.get("allowed_tools"):
+                config_lines.append(f"Allowed Tools: {', '.join(cfg['allowed_tools'])}")
+            if cfg.get("keywords"):
+                config_lines.append(f"Keywords: {', '.join(cfg['keywords'])}")
+            if config_lines:
+                parts.append(self.CONFIG_TEMPLATE.format(
+                    config="\n".join(config_lines),
+                ))
+
         # --- Memory ---
         memory_text = self._format_memory(memory, student_id, memory_store)
         if memory_text:
             parts.append(self.MEMORY_TEMPLATE.format(memory=memory_text))
+
+        # --- Phase 5.5: Current Lesson / Chapter ---
+        if current_chapter or current_lesson:
+            parts.append(self.CURRENT_LESSON_TEMPLATE.format(
+                chapter=current_chapter or "",
+                lesson=current_lesson or "",
+            ))
+
+        # --- Phase 5.5: Competencies ---
+        if competencies:
+            comp_text = "\n".join(f"- {c}" for c in competencies)
+            parts.append(self.COMPETENCIES_TEMPLATE.format(competencies=comp_text))
+
+        # --- Phase 5.5: Lesson Objectives ---
+        if lesson_objectives:
+            obj_text = "\n".join(f"- {o}" for o in lesson_objectives)
+            parts.append(self.LESSON_OBJECTIVES_TEMPLATE.format(objectives=obj_text))
+
+        # --- Phase 5.5: Learning Progress ---
+        if progress:
+            comp_pct = progress.get("completion_percent", 0)
+            total = progress.get("total_lessons", 0)
+            completed = progress.get("completed", 0)
+            time_spent = progress.get("total_time_minutes", 0)
+            progress_text = (
+                f"Completion: {comp_pct}% ({completed}/{total} lessons), "
+                f"{time_spent} min total time"
+            )
+            parts.append(self.PROGRESS_TEMPLATE.format(progress=progress_text))
+
+        # --- Phase 5.5: Competency Mastery ---
+        if average_mastery is not None or weak_competencies or strong_competencies:
+            mastery_lines = []
+            if average_mastery is not None:
+                mastery_lines.append(f"Average mastery: {average_mastery}%")
+            if weak_competencies:
+                weak_names = [c.get("name", c.get("id", "")) for c in weak_competencies]
+                mastery_lines.append(f"Weak: {', '.join(weak_names)}")
+            if strong_competencies:
+                strong_names = [c.get("name", c.get("id", "")) for c in strong_competencies]
+                mastery_lines.append(f"Strong: {', '.join(strong_names)}")
+            if mastery_lines:
+                parts.append(self.MASTERY_TEMPLATE.format(
+                    mastery="\n".join(mastery_lines),
+                ))
 
         # --- Learning style ---
         if learning_style:

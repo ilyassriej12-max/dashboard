@@ -33,12 +33,30 @@ def init_db() -> None:
         with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             conn.executescript(f.read())
 
+        # Schema migrations: add new columns to existing tables if missing.
+        _migrate_schema(conn)
+
         # Seed only when tables are empty (idempotent).
         if conn.execute("SELECT COUNT(*) FROM students").fetchone()[0] == 0:
             _seed(conn)
         conn.commit()
     finally:
         conn.close()
+
+
+def _migrate_schema(conn) -> None:
+    """Add missing columns to existing tables for schema migration."""
+    migrations = [
+        ("homework_attempts", "homework_id TEXT NOT NULL UNIQUE DEFAULT ''"),
+        ("quiz_attempts", "quiz_id TEXT NOT NULL UNIQUE DEFAULT ''"),
+        ("exam_attempts", "exam_id TEXT NOT NULL UNIQUE DEFAULT ''"),
+    ]
+    for table, column_def in migrations:
+        try:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {column_def}")
+        except Exception:
+            # Column already exists or table doesn't exist yet - skip.
+            pass
 
 
 def _seed(conn: sqlite3.Connection) -> None:
@@ -381,3 +399,599 @@ def _seed(conn: sqlite3.Connection) -> None:
         )
 
     conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Lesson Progress persistence helpers
+# ---------------------------------------------------------------------------
+def save_lesson_progress(
+    student_id: int,
+    subject_id: str,
+    lesson_id: str,
+    status: Optional[str] = None,
+    attempts: Optional[int] = None,
+    time_spent_minutes: Optional[int] = None,
+    best_score: Optional[float] = None,
+    last_attempt_at: Optional[int] = None,
+    completed_at: Optional[int] = None,
+) -> None:
+    """Upsert lesson progress for a student."""
+    import time as _time
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT id FROM lesson_progress
+            WHERE student_id = ? AND subject_id = ? AND lesson_id = ?
+            """,
+            (student_id, subject_id, lesson_id),
+        ).fetchone()
+        now = int(_time.time() * 1000)
+        if row is None:
+            conn.execute(
+                """
+                INSERT INTO lesson_progress
+                (student_id, subject_id, lesson_id, status, attempts,
+                 time_spent_minutes, best_score, last_attempt_at, completed_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    student_id, subject_id, lesson_id,
+                    status or "not_started",
+                    attempts or 0,
+                    time_spent_minutes or 0,
+                    best_score,
+                    last_attempt_at or now,
+                    completed_at,
+                ),
+            )
+        else:
+            updates = []
+            params: List[Any] = []
+            if status is not None:
+                updates.append("status = ?"); params.append(status)
+            if attempts is not None:
+                updates.append("attempts = ?"); params.append(attempts)
+            if time_spent_minutes is not None:
+                updates.append("time_spent_minutes = time_spent_minutes + ?"); params.append(time_spent_minutes)
+            if best_score is not None:
+                updates.append("best_score = MAX(best_score, ?)"); params.append(best_score)
+            if last_attempt_at is not None:
+                updates.append("last_attempt_at = ?"); params.append(last_attempt_at)
+            if completed_at is not None:
+                updates.append("completed_at = ?"); params.append(completed_at)
+            if updates:
+                params.extend([student_id, subject_id, lesson_id])
+                conn.execute(
+                    f"UPDATE lesson_progress SET {', '.join(updates)} "
+                    "WHERE student_id = ? AND subject_id = ? AND lesson_id = ?",
+                    params,
+                )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_lesson_progress(
+    student_id: int,
+    subject_id: str,
+    lesson_id: str,
+) -> Optional[Dict[str, Any]]:
+    """Load lesson progress for a specific lesson."""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT * FROM lesson_progress
+            WHERE student_id = ? AND subject_id = ? AND lesson_id = ?
+            """,
+            (student_id, subject_id, lesson_id),
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def load_all_lesson_progress(
+    student_id: int,
+    subject_id: str,
+) -> List[Dict[str, Any]]:
+    """Load all lesson progress for a student in a subject."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM lesson_progress
+            WHERE student_id = ? AND subject_id = ?
+            """,
+            (student_id, subject_id),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def load_all_student_lesson_progress(
+    student_id: int,
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Load all lesson progress for a student across all subjects."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM lesson_progress
+            WHERE student_id = ?
+            """,
+            (student_id,),
+        ).fetchall()
+        result: Dict[str, List[Dict[str, Any]]] = {}
+        for r in rows:
+            d = dict(r)
+            result.setdefault(d["subject_id"], []).append(d)
+        return result
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Competency Mastery persistence helpers
+# ---------------------------------------------------------------------------
+def save_competency_mastery(
+    student_id: int,
+    subject_id: str,
+    competency_id: str,
+    score: float,
+    times_assessed: Optional[int] = None,
+) -> None:
+    """Upsert competency mastery for a student."""
+    import time as _time
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT id, score, times_assessed FROM competency_mastery
+            WHERE student_id = ? AND subject_id = ? AND competency_id = ?
+            """,
+            (student_id, subject_id, competency_id),
+        ).fetchone()
+        now = int(_time.time() * 1000)
+        if row is None:
+            conn.execute(
+                """
+                INSERT INTO competency_mastery
+                (student_id, subject_id, competency_id, score, updated_at, times_assessed)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (student_id, subject_id, competency_id, score, now, times_assessed or 1),
+            )
+        else:
+            existing_score = row["score"]
+            existing_assessed = row["times_assessed"]
+            new_assessed = (existing_assessed or 0) + (times_assessed or 0)
+            conn.execute(
+                """
+                UPDATE competency_mastery
+                SET score = ?, updated_at = ?, times_assessed = ?
+                WHERE id = ?
+                """,
+                (score, now, new_assessed, row["id"]),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_competency_mastery(
+    student_id: int,
+    subject_id: str,
+    competency_id: str,
+) -> Optional[Dict[str, Any]]:
+    """Load competency mastery for a specific competency."""
+    conn = get_conn()
+    try:
+        row = conn.execute(
+            """
+            SELECT * FROM competency_mastery
+            WHERE student_id = ? AND subject_id = ? AND competency_id = ?
+            """,
+            (student_id, subject_id, competency_id),
+        ).fetchone()
+        return dict(row) if row else None
+    finally:
+        conn.close()
+
+
+def load_all_competency_mastery(
+    student_id: int,
+    subject_id: str,
+) -> List[Dict[str, Any]]:
+    """Load all competency mastery for a student in a subject."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM competency_mastery
+            WHERE student_id = ? AND subject_id = ?
+            """,
+            (student_id, subject_id),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+def load_all_student_competency_mastery(
+    student_id: int,
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Load all competency mastery for a student across all subjects."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM competency_mastery
+            WHERE student_id = ?
+            """,
+            (student_id,),
+        ).fetchall()
+        result: Dict[str, List[Dict[str, Any]]] = {}
+        for r in rows:
+            d = dict(r)
+            result.setdefault(d["subject_id"], []).append(d)
+        return result
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Homework attempt persistence helpers
+# ---------------------------------------------------------------------------
+def save_homework_attempt(
+    student_id: int,
+    subject_id: str,
+    chapter_id: Optional[str],
+    lesson_id: Optional[str],
+    competency: Optional[str],
+    title: str,
+    description: Optional[str],
+    difficulty: Optional[str],
+    due_date: Optional[str],
+    estimated_time: Optional[int],
+    status: str,
+    score: Optional[float],
+    total_score: Optional[float],
+    percentage: Optional[float],
+    created_at: Optional[int],
+    completed_at: Optional[int],
+    homework_id: Optional[str] = None,
+) -> int:
+    """Insert a homework attempt record and return its ID."""
+    import time as _time
+    conn = get_conn()
+    try:
+        now = int(_time.time() * 1000)
+        cursor = conn.execute(
+            """
+            INSERT INTO homework_attempts
+            (homework_id, student_id, subject_id, chapter_id, lesson_id, competency,
+             title, description, difficulty, due_date, estimated_time,
+             status, score, total_score, percentage, created_at, completed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                homework_id,
+                student_id, subject_id, chapter_id, lesson_id, competency,
+                title, description, difficulty, due_date, estimated_time,
+                status, score, total_score, percentage,
+                created_at or now, completed_at,
+            ),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+
+def load_homework_attempts(
+    student_id: int,
+) -> List[Dict[str, Any]]:
+    """Load all homework attempts for a student."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM homework_attempts
+            WHERE student_id = ?
+            ORDER BY created_at DESC
+            """,
+            (student_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Quiz attempt persistence helpers
+# ---------------------------------------------------------------------------
+def save_quiz_attempt(
+    student_id: int,
+    subject_id: str,
+    chapter_id: Optional[str],
+    lesson_id: Optional[str],
+    competency: Optional[str],
+    title: str,
+    difficulty: Optional[str],
+    num_questions: int,
+    score: float,
+    total_score: float,
+    percentage: float,
+    grade: str,
+    passed: bool,
+    started_at: Optional[int],
+    completed_at: Optional[int],
+    quiz_id: Optional[str] = None,
+) -> int:
+    """Insert a quiz attempt record and return its ID."""
+    import time as _time
+    conn = get_conn()
+    try:
+        now = int(_time.time() * 1000)
+        cursor = conn.execute(
+            """
+            INSERT INTO quiz_attempts
+            (quiz_id, student_id, subject_id, chapter_id, lesson_id, competency,
+             title, difficulty, num_questions, score, total_score,
+             percentage, grade, passed, started_at, completed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                quiz_id,
+                student_id, subject_id, chapter_id, lesson_id, competency,
+                title, difficulty, num_questions, score, total_score,
+                percentage, grade, 1 if passed else 0,
+                started_at or now, completed_at or now,
+            ),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+
+def load_quiz_attempts(
+    student_id: int,
+) -> List[Dict[str, Any]]:
+    """Load all quiz attempts for a student."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM quiz_attempts
+            WHERE student_id = ?
+            ORDER BY started_at DESC
+            """,
+            (student_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Exam attempt persistence helpers
+# ---------------------------------------------------------------------------
+def save_exam_attempt(
+    student_id: int,
+    subject_id: str,
+    chapter_id: Optional[str],
+    lesson_id: Optional[str],
+    competency: Optional[str],
+    title: str,
+    exam_type: str,
+    difficulty: Optional[str],
+    num_questions: int,
+    score: float,
+    total_score: float,
+    percentage: float,
+    grade: str,
+    passed: bool,
+    time_spent_minutes: int,
+    started_at: Optional[int],
+    completed_at: Optional[int],
+    recommendations: Optional[str],
+    barème: Optional[str],
+    exam_id: Optional[str] = None,
+) -> int:
+    """Insert an exam attempt record and return its ID."""
+    import time as _time
+    conn = get_conn()
+    try:
+        now = int(_time.time() * 1000)
+        cursor = conn.execute(
+            """
+            INSERT INTO exam_attempts
+            (exam_id, student_id, subject_id, chapter_id, lesson_id, competency,
+             title, exam_type, difficulty, num_questions, score, total_score,
+             percentage, grade, passed, time_spent_minutes, started_at,
+             completed_at, recommendations, barème)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                exam_id,
+                student_id, subject_id, chapter_id, lesson_id, competency,
+                title, exam_type, difficulty, num_questions, score, total_score,
+                percentage, grade, 1 if passed else 0, time_spent_minutes,
+                started_at or now, completed_at or now,
+                recommendations, barème,
+            ),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+
+def load_exam_attempts(
+    student_id: int,
+) -> List[Dict[str, Any]]:
+    """Load all exam attempts for a student."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM exam_attempts
+            WHERE student_id = ?
+            ORDER BY started_at DESC
+            """,
+            (student_id,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Learning Timeline persistence helpers
+# ---------------------------------------------------------------------------
+def save_timeline_event(
+    student_id: int,
+    event_type: str,
+    subject_id: Optional[str],
+    lesson_id: Optional[str],
+    chapter_id: Optional[str],
+    title: str,
+    description: Optional[str],
+    score: Optional[float],
+    timestamp: Optional[int],
+) -> int:
+    """Insert a timeline event and return its ID."""
+    import time as _time
+    conn = get_conn()
+    try:
+        cursor = conn.execute(
+            """
+            INSERT INTO learning_timeline
+            (student_id, event_type, subject_id, lesson_id, chapter_id,
+             title, description, score, timestamp)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                student_id, event_type, subject_id, lesson_id, chapter_id,
+                title, description, score,
+                timestamp or int(_time.time() * 1000),
+            ),
+        )
+        conn.commit()
+        return cursor.lastrowid
+    finally:
+        conn.close()
+
+
+def load_timeline_events(
+    student_id: int,
+    limit: int = 50,
+) -> List[Dict[str, Any]]:
+    """Load recent timeline events for a student."""
+    conn = get_conn()
+    try:
+        rows = conn.execute(
+            """
+            SELECT * FROM learning_timeline
+            WHERE student_id = ?
+            ORDER BY timestamp DESC
+            LIMIT ?
+            """,
+            (student_id, limit),
+        ).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Phase 5.6: Learning Statistics persistence helpers
+# ---------------------------------------------------------------------------
+def save_learning_statistics(
+    student_id: int,
+    period_type: str,
+    period_start: str,
+    period_end: str,
+    total_study_time_minutes: int,
+    lessons_completed: int,
+    quizzes_taken: int,
+    exams_taken: int,
+    average_quiz_score: Optional[float],
+    average_exam_score: Optional[float],
+    completion_rate: float,
+    subject_id: Optional[str],
+) -> None:
+    """Upsert learning statistics for a period."""
+    import time as _time
+    conn = get_conn()
+    try:
+        now = int(_time.time() * 1000)
+        row = conn.execute(
+            """
+            SELECT id FROM learning_statistics
+            WHERE student_id = ? AND period_type = ? AND period_start = ?
+              AND (subject_id IS NULL OR subject_id = ?)
+            """,
+            (student_id, period_type, period_start, subject_id),
+        ).fetchone()
+        if row is None:
+            conn.execute(
+                """
+                INSERT INTO learning_statistics
+                (student_id, period_type, period_start, period_end,
+                 total_study_time_minutes, lessons_completed, quizzes_taken,
+                 exams_taken, average_quiz_score, average_exam_score,
+                 completion_rate, subject_id, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    student_id, period_type, period_start, period_end,
+                    total_study_time_minutes, lessons_completed, quizzes_taken,
+                    exams_taken, average_quiz_score, average_exam_score,
+                    completion_rate, subject_id, now,
+                ),
+            )
+        else:
+            conn.execute(
+                """
+                UPDATE learning_statistics
+                SET period_end = ?, total_study_time_minutes = ?,
+                    lessons_completed = ?, quizzes_taken = ?, exams_taken = ?,
+                    average_quiz_score = ?, average_exam_score = ?,
+                    completion_rate = ?, updated_at = ?
+                WHERE id = ?
+                """,
+                (
+                    period_end, total_study_time_minutes, lessons_completed,
+                    quizzes_taken, exams_taken, average_quiz_score,
+                    average_exam_score, completion_rate, now, row["id"],
+                ),
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def load_learning_statistics(
+    student_id: int,
+    period_type: Optional[str] = None,
+    subject_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Load learning statistics for a student."""
+    conn = get_conn()
+    try:
+        query = "SELECT * FROM learning_statistics WHERE student_id = ?"
+        params: List[Any] = [student_id]
+        if period_type:
+            query += " AND period_type = ?"; params.append(period_type)
+        if subject_id:
+            query += " AND subject_id = ?"; params.append(subject_id)
+        query += " ORDER BY period_start DESC"
+        rows = conn.execute(query, params).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        conn.close()

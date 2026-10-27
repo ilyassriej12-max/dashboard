@@ -1,0 +1,112 @@
+{
+  "name": "SVT",
+  "subject": "SVT",
+  "model": "gemini-1.5-flash",
+  "priority": 6,
+  "allowed_tools": [],
+  "curriculum": ["Biology", "Genetics", "Ecology", "Anatomy", "Geology"],
+  "keywords": ["svt", "biology", "life science", "cell", "dna", "gene", "ecosystem", "photosynthesis", "evolution", "anatomy", "geology", "rock", "mineral", "fossil", "habitat", "species"],
+  "personality": "curious, observant, nature-loving",
+  "description": "Adaptive SVT tutor with biological and geological explanations",
+  "explanation_style": "process-first",
+  "reasoning_style": "inductive",
+  "vocabulary": ["cell", "organism", "ecosystem", "photosynthesis", "evolution", "anatomy", "geology", "rock", "mineral", "fossil", "habitat", "species"],
+  "examples": ["explain photosynthesis", "describe cell division", "identify rock types", "analyze ecosystem", "describe evolution"],
+  "preferred_lesson_flow": ["introduction", "concept", "example", "exercise", "reflection"],
+  "correction_style": "gentle",
+  "teaching_personality": "curious, observant, nature-loving",
+  "objectives": ["understand biological systems", "explain geological processes", "connect to real-world phenomena"],
+  "restrictions": [],
+  "keywords": ["svt", "biology", "life science", "cell", "dna", "gene", "ecosystem", "photosynthesis", "evolution", "anatomy", "geology", "rock", "mineral", "fossil", "habitat", "species"],
+  "homework_rules": "Process observation, diagram labeling, concept review, field study",
+  "revision_rules": "Systems, vocabulary, concepts, diagrams, field observations",
+  "exercise_types": ["explanations", "diagrams", "comparisons", "process analysis", "field observations"],
+  "evaluation_rules": ["scientific understanding", "terminology", "biological reasoning"],
+  "common_mistakes": ["confusing concepts", "incorrect terminology", "misidentifying species", "misunderstanding processes"],
+  "difficulty_preference": "beginner",
+  "curriculum": {
+    "subject": "SVT",
+    "chapters": [
+      {
+        "chapter_id": "cell_biology",
+        "title": "Cell Biology",
+        "description": "Cell structure, function, and division",
+        "lessons": [
+          {
+            "lesson_id": "svt_cell_1",
+            "title": "Cell Structure",
+            "description": "Structure of plant and animal cells, organelles",
+            "content": "Structure of plant and animal cells, organelles and their functions",
+            "key_concepts": ["cell membrane", "nucleus", "mitochondria", "chloroplast", "ribosome"],
+            "learning_objectives": ["Identify cell organelles", "Explain function of each organelle", "Compare plant and animal cells"],
+            "prerequisites": [],
+            "estimated_duration_minutes": 45,
+            "difficulty": "beginner",
+            "order": 1
+          },
+          {
+            "lesson_id": "svt_cell_2",
+            "title": "Cell Division",
+            "description": "Mitosis and meiosis",
+            "content": "Mitosis and meiosis, cell cycle, DNA replication",
+            "key_concepts": ["mitosis", "meiosis", "cell cycle", "DNA replication", "chromosomes"],
+            "learning_objectives": ["Understand mitosis and meiosis", "Understand cell cycle", "Compare mitosis and meiosis"],
+            "prerequisites": ["svt_cell_1"],
+            "estimated_duration_minutes": 60,
+            "difficulty": "intermediate",
+            "order": 2
+          }
+        ],
+        "prerequisites": [],
+        "competencies": [
+          {
+            "id": "cell_structure",
+            "name": "Cell Structure",
+            "description": "Understand cell structure and organelles",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": []
+          },
+          {
+            "id": "cell_division",
+            "name": "Cell Division",
+            "description": "Understand mitosis and meiosis",
+            "mastery_threshold": 75,
+            "prerequisite_competencies": ["cell_structure"]
+          }
+        ],
+        "objectives": [
+          "Understand cell structure",
+          "Identify cell organelles and their functions",
+          "Understand cell division (mitosis and meiosis)"
+        ],
+        "estimated_duration_minutes": 105,
+        "difficulty": "beginner",
+        "order": 1
+      }
+    ],
+    "competencies": [
+      {
+        "id": "cell_structure",
+        "name": "Cell Structure",
+        "description": "Understand cell structure and organelles",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": []
+      },
+      {
+        "id": "cell_division",
+        "name": "Cell Division",
+        "description": "Understand mitosis and meiosis",
+        "mastery_threshold": 75,
+        "prerequisite_competencies": ["cell_structure"]
+      }
+    ],
+    "objectives": [
+      "Understand cell structure",
+      "Identify cell organelles and their functions",
+      "Understand cell division (mitosis and meiosis)"
+    ],
+    "estimated_duration_minutes": 105,
+    "difficulty": "beginner",
+    "order": 1
+  }
+}
